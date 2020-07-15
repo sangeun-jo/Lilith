@@ -4,27 +4,24 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+
 import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
+import java.util.Date;
 // 날 것의 배열을 화면에 뿌려줄 수 있도록 가공해주는 애
 
 public class CalendarAdapter extends BaseAdapter {
 
+    public Date selectedData;
     private ArrayList<String> _13dayList; //뿌려줄 데이터
     private ArrayList<String> _12dayList; //뿌려줄 데이터
 
-    public CalendarAdapter(ArrayList<String> _13dayList, ArrayList<String> _12dayList){ //생성자
+    public CalendarAdapter(ArrayList<String> _13dayList, ArrayList<String> _12dayList, Date date){ //생성자
         this._13dayList = _13dayList;
         this._12dayList = _12dayList;
+        this.selectedData = date;
     }
 
     @Override

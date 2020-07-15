@@ -124,4 +124,18 @@
         android:numColumns="7"
         android:stretchMode="columnWidth"
         android:verticalSpacing="0dp" />
+
+    <TextView
+        android:id="@+id/test12"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="12월 달력 ########"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/test13"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="13월 달력 ########"
+        android:textAlignment="center" />
 </LinearLayout>
