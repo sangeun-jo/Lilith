@@ -35,9 +35,8 @@
         android:layout_marginTop="3dp"
         android:layout_marginBottom="3dp"
         android:gravity="center|bottom"
-        android:text="##.##"
-        android:textSize="10sp"
-        android:textColor="#d3d3d3"/>
+        android:textColor="#d3d3d3"
+        android:textSize="10sp" />
 
     <!-- /날짜 -->
 

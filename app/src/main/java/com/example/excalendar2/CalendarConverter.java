@@ -1,14 +1,9 @@
 package com.example.excalendar2;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.GridView;
-import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 
 // 캘린더 먼스 햇갈릴때
@@ -16,8 +11,29 @@ import java.util.Date;
 
 public class CalendarConverter {
 
+    public CalendarConverter(){}
 
-    public CalendarConverter(){
+    // 12월에서 13월로 바꾸기
+    public Calendar convert12to13(int year, int month, int day){
+
+        //1월부터 누적날짜 구하기
+        Calendar jen = Calendar.getInstance();
+        jen.set(year, 0, 1);
+
+        Calendar today = Calendar.getInstance();
+        today.set(year, month-1, day);
+
+        long diffSec = ( today.getTimeInMillis() -jen.getTimeInMillis())/1000;
+        long diffDays = diffSec / (24*60*60);
+
+        //변환하기
+        int _13Month = (int) diffDays / 28 + 1;
+        int _13Day = (int) diffDays % 28 + 1;
+
+        Calendar converted = Calendar.getInstance();
+        converted.set(year, _13Month-1, _13Day);
+
+        return converted;
     }
 
     //13월에서 12월로 바꾸기
@@ -35,14 +51,14 @@ public class CalendarConverter {
             calendar.set(Calendar.DATE, day);
             d = dList.get(12);
 
-        } else { // 2~12월달
+        } else { //1~12
 
-            calendar.set(Calendar.YEAR, year); //2021
-            calendar.set(Calendar.MONTH, month-1); //들어오는 값이 2일때 , 1이 되므로 2월달로 세팅이 됩
-            calendar.set(Calendar.DATE, day); //1
-            d = dList.get(month-1); //첫번째 값을 받음
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month-1);
+            calendar.set(Calendar.DATE, day);
+            d = dList.get(month-1);
         }
-        calendar.add(Calendar.DATE, -d); //현재 날짜에서 3일 뻄
+        calendar.add(Calendar.DATE, -d);
 
         return calendar;
     }
@@ -61,7 +77,7 @@ public class CalendarConverter {
 
         for(int i = 2; i <= 13; i++){
             calendar.set(Calendar.MONTH, i-2);
-            monthMax = calendar.getActualMaximum(Calendar.DAY_OF_MONTH); 
+            monthMax = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
             if(monthMax == 28) d = 3;
             else if(monthMax == 29) d = d + 1;
             else if(monthMax == 30) d = d + 2;
