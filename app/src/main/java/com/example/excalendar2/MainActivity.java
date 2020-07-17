@@ -13,7 +13,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.Calendar;;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 
 
@@ -35,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     CalendarAdapter calendarAdapter; //캘린더 어댑터 객체
     CalendarConverter calConverter = new CalendarConverter();
     Calendar selectedDate; // 선택된 날짜
+    Calendar mThisMonthCalendar;
 
 
     @SuppressLint("WrongViewCast")
@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         curYear = calendar.get(Calendar.YEAR); //현재 년도
         curMonth = calendar.get(Calendar.MONTH)+1;
 
-        selectedDate = calConverter.convert12to13( //오늘날자로 세팅
+
+        selectedDate = calConverter.convert12to13( //오늘날짜를 13월로 바꾸어서 세팅
                 curYear, curMonth, calendar.get(Calendar.DATE));
 
 
@@ -87,6 +88,13 @@ public class MainActivity extends AppCompatActivity {
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() { // 날짜 중에 아무거나 선택하면
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                DayInfo clickedDay = (DayInfo)view.getTag();
+                if(clickedDay.inMonth){
+                    setSelectedDate(clickedDay.get13DayCal());
+                } else{
+                    return;
+                }
+                calendarAdapter.notifyDataSetChanged();
                 Toast.makeText(getApplicationContext(),"그리드 뷰가 눌렸습니다.", Toast.LENGTH_SHORT).show();
             }
         });
@@ -100,14 +108,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //캘린더 그리는 함수
+    @Override
+    public void onResume() {
+        super.onResume();
+        mThisMonthCalendar = Calendar.getInstance(Locale.KOREA);  //달력 객체
+        Calendar cal = calConverter.convert12to13(mThisMonthCalendar.get(Calendar.YEAR), mThisMonthCalendar.get(Calendar.MONTH)+1, mThisMonthCalendar.get(Calendar.DATE));
+        drawCalendar(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH)+1);  //오늘 날짜
+        //drawCalendar(mThisMonthCalendar.get(Calendar.YEAR), mThisMonthCalendar.get(Calendar.MONTH)+1);
+    }
+
+    //13월 기준으로 13. 12 캘린더 그리는 함수
     @SuppressLint("SetTextI18n")
     public void drawCalendar(int year, int month) {
 
         int dayOfWeek;
         arrayListDayInfo.clear();
 
-        Calendar jen = new GregorianCalendar(year, 0, 1);
+        Calendar jen = Calendar.getInstance(Locale.KOREA);
+        jen.set(year, 0, 1);
         dayOfWeek = jen.get(Calendar.DAY_OF_WEEK);
 
         DayInfo day;
@@ -170,24 +188,5 @@ public class MainActivity extends AppCompatActivity {
         calendarAdapter = new CalendarAdapter(selectedDate, arrayListDayInfo);
         gv.setAdapter(calendarAdapter); //그리드 뷰에 어댑터 연결
 
-
-        /* 테스트
-        TextView testView12 = findViewById(R.id.test12);
-        TextView testView13 = findViewById(R.id.test13);
-        CalendarConverter calendarConverter = new CalendarConverter();
-        Calendar cal = calendarConverter.convert12to13(2020, 9, 9);
-        @SuppressLint("SimpleDateFormat")
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        //String result = df.format(cal);
-        int tMonth = cal.get(Calendar.MONTH) + 1;
-        String result = cal.get(Calendar.YEAR) + "-" +  tMonth + "-" + cal.get(Calendar.DATE);
-        testView12.setText("2020-09-09");
-        testView13.setText(result);
-        */
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 }

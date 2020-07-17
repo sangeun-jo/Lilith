@@ -37,10 +37,9 @@ public class CalendarAdapter extends BaseAdapter {
         return 0;
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        //커스텀 하기
+
         DayInfo day = arrayListDayInfo.get(position);
 
         if(convertView == null) {
@@ -58,13 +57,15 @@ public class CalendarAdapter extends BaseAdapter {
                 ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
             }else{
                 ivSelected.setVisibility(View.INVISIBLE); //선택된 날짜와 다른 날짜면 보이지 않게
-                System.out.println();
             }
 
             if(day.inMonth){
-                tvDay12.setText(day.get12Day(1));
+
+                tvDay12.setText(day.get12DayStr(1));
                 tvDay13.setText(day.getDay());
             }
+
+            convertView.setTag(day);
 
             return convertView; //데이터를 뿌린 뷰를 반환함
         }
