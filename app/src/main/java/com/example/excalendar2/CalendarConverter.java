@@ -2,7 +2,6 @@ package com.example.excalendar2;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 
@@ -39,22 +38,17 @@ public class CalendarConverter {
     //13월에서 12월로 바꾸기
     public Calendar convert13to12(int year, int month, int day){
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar;
         ArrayList<Integer> dList = getDifference(year);
 
         int d;
 
         if(month == 13){ // 13월
-            // 현재 날짜를 내년 1월 day 로 설정
-            calendar.set(Calendar.YEAR, year+1);
-            calendar.set(Calendar.MONTH, 0);
-            calendar.set(Calendar.DATE, day);
+            calendar = new GregorianCalendar(year+1,0,day);
             d = dList.get(12);
 
-        } else { //1~12
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month-1);
-            calendar.set(Calendar.DATE, day);
+        } else { // 1~12월
+            calendar = new GregorianCalendar(year, month-1, day);
             d = dList.get(month-1);
         }
         calendar.add(Calendar.DATE, -d);
@@ -66,6 +60,7 @@ public class CalendarConverter {
 
         int d = 0;
         int monthMax;
+
         ArrayList<Integer> dList;
         Calendar calendar = Calendar.getInstance();;
 
@@ -77,6 +72,7 @@ public class CalendarConverter {
         for(int i = 2; i <= 13; i++){
             calendar.set(Calendar.MONTH, i-2);
             monthMax = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
             if(monthMax == 28) d = 3;
             else if(monthMax == 29) d = d + 1;
             else if(monthMax == 30) d = d + 2;

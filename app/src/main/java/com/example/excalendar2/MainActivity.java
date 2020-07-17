@@ -1,7 +1,6 @@
 package com.example.excalendar2;
 
 
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
@@ -9,23 +8,13 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import org.w3c.dom.Text;
-
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.Calendar;;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-
-import static java.lang.Integer.getInteger;
-import static java.lang.Integer.parseInt;
 
 
 //어플이름은 릴리스
@@ -45,11 +34,10 @@ public class MainActivity extends AppCompatActivity {
 
     CalendarAdapter calendarAdapter; //캘린더 어댑터 객체
     CalendarConverter calConverter = new CalendarConverter();
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd(EEE)", Locale.getDefault()); //날짜 포맷 설정
     Calendar selectedDate; // 선택된 날짜
 
 
-
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,19 +45,24 @@ public class MainActivity extends AppCompatActivity {
 
 
         tvCalendarTitle = findViewById(R.id.tv_calendar_title); //제목
+        tvSelectedDate = findViewById(R.id.iv_selected);
+        gv = findViewById(R.id.gv_calendar);  //그리드 뷰
         ImageButton btnPreviousCalendar = findViewById(R.id.btn_previous_calendar); //이전달 버튼
         ImageButton btnNextCalendar = findViewById(R.id.btn_next_calendar); // 다음달 버튼
-        gv = findViewById(R.id.gv_calendar);  //그리드 뷰
+
 
         //초기세팅
-        Calendar calendar = Calendar.getInstance(); //현재 연월일시
+        Calendar calendar = Calendar.getInstance(Locale.KOREA); //현재 연월일시
         curYear = calendar.get(Calendar.YEAR); //현재 년도
-        int temp = calendar.get(Calendar.MONTH)+1;
+        curMonth = calendar.get(Calendar.MONTH)+1;
 
         selectedDate = calConverter.convert12to13( //오늘날자로 세팅
-                calendar.get(Calendar.YEAR), temp, calendar.get(Calendar.DATE));
+                curYear, curMonth, calendar.get(Calendar.DATE));
 
-        drawCalendar(curYear, 1);  //현재 년도 1월
+
+        drawCalendar(selectedDate.get(Calendar.YEAR), selectedDate.get(Calendar.MONTH)+1);  //현재 년도 1월
+
+        //버튼
 
         btnPreviousCalendar.setOnClickListener(new View.OnClickListener(){ // 이전달 버튼이 눌리면
             @Override
@@ -91,15 +84,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        /*
         gv.setOnItemClickListener(new AdapterView.OnItemClickListener() { // 날짜 중에 아무거나 선택하면
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                setSelectedDate(((String)view.getTag()));
-                CalendarAdapter.notifyDataSetChanged();
+                Toast.makeText(getApplicationContext(),"그리드 뷰가 눌렸습니다.", Toast.LENGTH_SHORT).show();
             }
         });
-         */
     }
 
     public void setSelectedDate(Calendar date){
@@ -115,24 +105,20 @@ public class MainActivity extends AppCompatActivity {
     public void drawCalendar(int year, int month) {
 
         int dayOfWeek;
-
         arrayListDayInfo.clear();
 
-        //입력 받은 년도 1월 1일 요일 구하기
         Calendar jen = new GregorianCalendar(year, 0, 1);
         dayOfWeek = jen.get(Calendar.DAY_OF_WEEK);
-
 
         DayInfo day;
         String date;
 
-        // 달력 앞 빈 쉘 처리(day 객체에는 null 값 들어감)
+        // 달력 앞 빈 쉘 처리
         if (dayOfWeek == 1) {
             for (int i = 0; i < 6; i++) {
                day = new DayInfo();
                arrayListDayInfo.add(day);
             }
-
         } else {
             for (int i = 0; i < dayOfWeek-2; i++) {
                 day = new DayInfo();
@@ -141,16 +127,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 숫자 쉘 그리기
-        if (month != 13) {
+        if (month != 13) { // 1~12월
             for (int i = 1; i <= 28; i++) {
                 day = new DayInfo();
                 date = year+"-"+month+"-"+i;
                 day.setDate(date,true);
                 arrayListDayInfo.add(day);
             }
-        } else {
-
-            if (year % 4 == 0) { //윤년이면
+        } else { // 13월
+            if (year % 4 == 0) { //윤년
                 for (int i = 1; i <= 30; i++) { //13월이 30일
                     day = new DayInfo();
                     date = year+"-"+month+"-"+i;
@@ -158,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                     arrayListDayInfo.add(day);
                 }
             } else {
-                for (int i = 1; i <= 29; i++) { //13월이 29일
+                for (int i = 1; i <= 29; i++) {
                     day = new DayInfo();
                     date = year+"-"+month+"-"+i;
                     day.setDate(date, true);
@@ -167,23 +152,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-/*
-        // 12월 달력 그리기
-        for (int i = 1; i <= _13dayList.size(); i++) {
-            Calendar calendar = calConverter.convert13to12(year, month, i);
-
-            //나중에 포멧 관련 정리 좀 하기
-            String string12;
-            int tempMonth = calendar.get(Calendar.MONTH)+1;
-            string12 = tempMonth + "." + calendar.get(Calendar.DATE);
-            _12dayList.add(string12);
+        // 달력 뒷부분 그리기
+        if (dayOfWeek == 1) {
+            day = new DayInfo();
+            arrayListDayInfo.add(day);
+        } else {
+            for (int i = 0; i < 9-dayOfWeek; i++) {
+                day = new DayInfo();
+                arrayListDayInfo.add(day);
+            }
         }
-*/
+
         // 연, 월 그리기
         tvCalendarTitle.setText(year + "년 " + month + "월");
 
         //그리드 뷰에 그리기
-        calendarAdapter = new CalendarAdapter(arrayListDayInfo);
+        calendarAdapter = new CalendarAdapter(selectedDate, arrayListDayInfo);
         gv.setAdapter(calendarAdapter); //그리드 뷰에 어댑터 연결
 
 
@@ -200,5 +184,10 @@ public class MainActivity extends AppCompatActivity {
         testView12.setText("2020-09-09");
         testView13.setText(result);
         */
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 }

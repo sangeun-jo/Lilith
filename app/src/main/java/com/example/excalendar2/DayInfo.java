@@ -1,9 +1,8 @@
 package com.example.excalendar2;
 
 import android.annotation.SuppressLint;
-
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 //13월 기준 객체
 public class DayInfo {
@@ -24,6 +23,7 @@ public class DayInfo {
         return Integer.toString(d);
     }
 
+    //12월 날짜로 변환해서 반환
     public String get12Day(int stringType){
         @SuppressLint("SimpleDateFormat")
         CalendarConverter calendarConverter = new CalendarConverter();
@@ -34,15 +34,26 @@ public class DayInfo {
         day = cal12.get(Calendar.DATE);
         String date = "";
         if(stringType == 0){
-            date =year+"-"+mon+"-"+day;
+            date =year+"-"+mon+"-"+day;  // yy/mm/dd 형태
         } else if (stringType == 1){
-            date = mon+"/"+day;
+            date = mon+"/"+day; // mm/dd 형태
         }
         return date;
     }
 
     public String getDate(){
-        return date;
+        return this.date;
     }
+
+    // 같은 날짜면 true 다른 날짜면 false 반환
+    public boolean isSameDay(Calendar date1){
+
+
+        boolean sameDay = date1.get(Calendar.YEAR) == y &&
+                date1.get(Calendar.MONTH)+1 == m &&
+                date1.get(Calendar.DATE) == d;
+        return sameDay;
+    }
+
 
 }
