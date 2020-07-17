@@ -52,7 +52,6 @@ public class CalendarConverter {
             d = dList.get(12);
 
         } else { //1~12
-
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month-1);
             calendar.set(Calendar.DATE, day);
