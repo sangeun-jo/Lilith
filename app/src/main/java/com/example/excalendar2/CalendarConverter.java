@@ -13,29 +13,24 @@ public class CalendarConverter {
     public CalendarConverter(){}
 
     // 12월에서 13월로 바꾸기
-    public Calendar convert12to13(int year, int month, int day){
+    public String convert12to13(Calendar today){
 
         //1월부터 누적날짜 구하기
         Calendar jen = Calendar.getInstance(Locale.KOREA);
-        jen.set(year, 0, 1);
-
-        Calendar today = Calendar.getInstance(Locale.KOREA);
-        today.set(year, month-1, day);
+        jen.set(today.get(Calendar.YEAR), 0, 1);
 
         long diffSec = ( today.getTimeInMillis() -jen.getTimeInMillis())/1000;
         long diffDays = diffSec / (24*60*60) + 1;
 
         //변환하기
-        int _13Month = (int) diffDays / 28 + 1;
-        int _13Day = (int) diffDays % 28 + 1;
+        int m = (int) diffDays / 28 + 1;
+        int d = (int) diffDays % 28 + 1;
 
-        Calendar converted = Calendar.getInstance(Locale.KOREA);
-        converted.set(year, _13Month-1, _13Day);
-
-        System.out.println(year+"/"+_13Month+"/"+_13Day);
+        String converted = today.get(Calendar.YEAR)+"-" + m + "-" + d;
 
         return converted;
     }
+
 
     //13월에서 12월로 바꾸기
     public Calendar convert13to12(int year, int month, int day){

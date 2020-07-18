@@ -1,23 +1,28 @@
 package com.example.excalendar2;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 // 날 것의 배열을 화면에 뿌려줄 수 있도록 가공해주는 애
 
 public class CalendarAdapter extends BaseAdapter {
 
-    public Calendar selectedDate;
+    public String selectedDate;
     public ArrayList<DayInfo> arrayListDayInfo;
 
-    public CalendarAdapter(Calendar selectedDate, ArrayList<DayInfo> arrayListDayInfo){ //생성자
+    public CalendarAdapter(String selectedDate, ArrayList<DayInfo> arrayListDayInfo){ //생성자
         this.selectedDate = selectedDate;
         this.arrayListDayInfo = arrayListDayInfo;
     }
@@ -52,7 +57,6 @@ public class CalendarAdapter extends BaseAdapter {
 
             ImageView ivSelected = convertView.findViewById(R.id.iv_selected);
 
-
             if(day.isSameDay(selectedDate)){
                 ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
             }else{
@@ -60,9 +64,19 @@ public class CalendarAdapter extends BaseAdapter {
             }
 
             if(day.inMonth){
-
-                tvDay12.setText(day.get12DayStr(1));
+                SimpleDateFormat sdf = new SimpleDateFormat("M/d", Locale.KOREA);
+                tvDay12.setText(sdf.format(day.get12DayCal().getTime()));
                 tvDay13.setText(day.getDay());
+
+                if((position%7 + 1) == 7){   //일요일이면
+                    tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
+                }else if((position%7 + 1) == 6){ //토요일이면
+                    tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
+                }else{ //나머지 날은 검정색
+                    tvDay13.setTextColor(Color.BLACK);
+                }
+
+                tvDay12.setTextColor(Color.GRAY); //12월
             }
 
             convertView.setTag(day);

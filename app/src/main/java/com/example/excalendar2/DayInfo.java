@@ -1,6 +1,8 @@
 package com.example.excalendar2;
 
 import android.annotation.SuppressLint;
+
+import java.time.Year;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -9,15 +11,12 @@ import java.util.Locale;
 //13월 기준 객체
 public class DayInfo {
     private String date;
-    public boolean inMonth = false;
     int y, m, d;
+    public boolean inMonth = false;
 
-    public void setDate(String stringDate, boolean inMonth){
-        String dayArray[] = stringDate.split("-");
-        y = Integer.parseInt(dayArray[0]);
-        m = Integer.parseInt(dayArray[1]);
-        d = Integer.parseInt(dayArray[2]);
-        this.date = stringDate;
+    public void setDate(int year, int month, int day, boolean inMonth){
+        y = year; m = month; d = day;
+        this.date = year + "-" +month + "-" + day;
         this.inMonth = inMonth;
     }
 
@@ -32,45 +31,13 @@ public class DayInfo {
         return cal12;
     }
 
-    //13월 Calendar 객체 반환
-    public Calendar get13DayCal(){
-        Calendar cal13 = Calendar.getInstance(Locale.KOREA);
-        cal13.set(y,m-1,d);
-        return cal13;
-    }
-
-
-    public String get12DayStr(int stringType){
-        CalendarConverter calendarConverter = new CalendarConverter();
-        Calendar cal12 = calendarConverter.convert13to12(y,m,d);
-        int year, mon, day;
-
-        year = cal12.get(Calendar.YEAR)-2000;
-        mon = cal12.get(Calendar.MONTH) + 1;
-        day = cal12.get(Calendar.DATE);
-
-        String date = "";
-
-        if(stringType == 0){
-            date =year+"-"+mon+"-"+day;  // yy/mm/dd 형태
-        }
-        else if (stringType == 1){
-            date = mon+"/"+day; // mm/dd 형태
-        }
-
-        return date;
-    }
-
     public String getDate(){
         return this.date;
     }
 
     // 같은 날짜면 true 다른 날짜면 false 반환
-    public boolean isSameDay(Calendar date1){
-
-        boolean sameDay = date1.get(Calendar.YEAR) == y &&
-                date1.get(Calendar.MONTH)+1 == m &&
-                date1.get(Calendar.DATE) == d;
+    public boolean isSameDay(String date1){
+        boolean sameDay = date1.equals(this.date);
         return sameDay;
     }
 
