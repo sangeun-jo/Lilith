@@ -12,13 +12,16 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;;
 import java.util.Locale;
 
-//날짜 -> 스트링
-//스트링 -> 날짜 변환해 주는 도구 하나 있어야 겠다.
+
+// 12월 달력을 기준으로 그리고, 밑에 조그맣게 정혈 주기 별 커스텀 달력으로 보이게 해야겠다.
+// 옵션으로 정혈달력을 기준으로 사용할 수 있음
+// 하단 바 있는 프레그먼트 레이아웃으로 만들기
+// 메뉴-오늘, 정혈 달력, 통계, 설정
+// 요일 레이블 추가, 시작 요일 선택에 따라 바뀌게 하기
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         tvCalendarTitle = findViewById(R.id.tv_calendar_title); //제목
         tvSelectedDate = findViewById(R.id.iv_selected);
         gridView = findViewById(R.id.gv_calendar);  //그리드 뷰
+        gridView.setNumColumns(cCal.DAY_PER_WEEK);
 
         ImageButton btnPreviousCalendar = findViewById(R.id.btn_previous_calendar); //이전달 버튼
         ImageButton btnNextCalendar = findViewById(R.id.btn_next_calendar); // 다음달 버튼
@@ -140,8 +144,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     //13월 기준으로 13. 12 캘린더 그리는 함수
-    @SuppressLint("SetTextI18n")
     public void drawCalendar(int year, int month) {
         arrayListDayInfo.clear();
 

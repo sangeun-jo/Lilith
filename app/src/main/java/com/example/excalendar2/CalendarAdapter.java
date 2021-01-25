@@ -21,6 +21,8 @@ public class CalendarAdapter extends BaseAdapter {
 
     public String selectedDate;
     public ArrayList<DayInfo> arrayListDayInfo;
+    private CustomCalendar cCal = new CustomCalendar();
+    //int first_week = 1; //월요일2, 일요일 1. 쉐어드 프로퍼런스 불러오기
 
     public CalendarAdapter(String selectedDate, ArrayList<DayInfo> arrayListDayInfo){ //생성자
         this.selectedDate = selectedDate;
@@ -69,15 +71,36 @@ public class CalendarAdapter extends BaseAdapter {
                 tvDay12.setText(sdf.format(day.get12DayCal().getTime()));
                 tvDay13.setText(day.getDay());
 
-                if((position%7 + 1) == 7){   //일요일이면
+                if(cCal.FIRST_WEEK == 1){
+                    if((position % cCal.DAY_PER_WEEK) == 0){   //일요일이면
+                        tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
+                    } else if((position % cCal.DAY_PER_WEEK) == 6){ //토요일이면
+                        tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
+                    }else{ //나머지 날은 검정색
+                        tvDay13.setTextColor(Color.BLACK);
+                    }
+                } else{
+                    if((position % cCal.DAY_PER_WEEK) == 6){   //일요일이면
+                        tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
+                    } else if((position % cCal.DAY_PER_WEEK) == 5){ //토요일이면
+                        tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
+                    }else{ //나머지 날은 검정색
+                        tvDay13.setTextColor(Color.BLACK);
+                    }
+                }
+
+                /*
+                if((position % cCal.DAY_PER_WEEK) == 6){   //일요일이면
                     tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
-                }else if((position%7 + 1) == 6){ //토요일이면
+                } else if((position % cCal.DAY_PER_WEEK) == 5){ //토요일이면
                     tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
                 }else{ //나머지 날은 검정색
                     tvDay13.setTextColor(Color.BLACK);
                 }
-
+                */
                 tvDay12.setTextColor(Color.GRAY); //12월
+
+
             }
 
             convertView.setTag(day);

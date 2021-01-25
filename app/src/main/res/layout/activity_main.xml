@@ -40,12 +40,6 @@
     </LinearLayout>
     <!-- 정혈일이 nn 날로 다가 옵니다. 텍스트 넣을 자리 -->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="horizontal"/>
 
     <LinearLayout
         android:layout_width="340dp"
@@ -106,18 +100,19 @@
         android:layout_marginTop="20dp"
         android:orientation="horizontal"/>
 
+    <!-- 그리드 뷰 좌우 스크롤 필요 -->
     <GridView
         android:id="@+id/gv_calendar"
         android:layout_width="320dp"
         android:layout_height="340dp"
-
         android:layout_gravity="center"
         android:columnWidth="90dp"
         android:horizontalSpacing="0dp"
-        android:numColumns="7"
         android:paddingTop="20dp"
         android:stretchMode="columnWidth"
         android:verticalSpacing="0dp" />
 
 </LinearLayout>
+
+
 
