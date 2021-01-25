@@ -58,6 +58,7 @@ public class CalendarAdapter extends BaseAdapter {
             ImageView ivSelected = convertView.findViewById(R.id.iv_selected);
 
             if(day.isSameDay(selectedDate)){
+
                 ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
             }else{
                 ivSelected.setVisibility(View.INVISIBLE); //선택된 날짜와 다른 날짜면 보이지 않게

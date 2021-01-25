@@ -26,8 +26,10 @@ public class DayInfo {
 
     //12월 날짜로 변환해서 Calendar 객체로 반환
     public Calendar get12DayCal(){
-        CalendarConverter calendarConverter = new CalendarConverter();
-        Calendar cal12 = calendarConverter.convert13to12(y,m,d);
+        CustomCalendar cCal = new CustomCalendar();
+        Calendar cal12 = cCal.cToN(y, m, d);
+        //CalendarConverter calendarConverter = new CalendarConverter();
+        //Calendar cal12 = calendarConverter.convert13to12(y,m,d);
         return cal12;
     }
 
@@ -40,6 +42,4 @@ public class DayInfo {
         boolean sameDay = date1.equals(this.date);
         return sameDay;
     }
-
-
 }

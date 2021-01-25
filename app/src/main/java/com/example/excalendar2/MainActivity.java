@@ -11,10 +11,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;;
 import java.util.Locale;
-
 
 //날짜 -> 스트링
 //스트링 -> 날짜 변환해 주는 도구 하나 있어야 겠다.
@@ -30,10 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<DayInfo> arrayListDayInfo = new ArrayList<>();
 
     CalendarAdapter calendarAdapter; //캘린더 어댑터 객체
-    CalendarConverter calConverter = new CalendarConverter();
+    CustomCalendar cCal = new CustomCalendar();
     String selectedDate; // 선택된 날짜. 13월 기준
-    String today;
-    Calendar mThisMonthCalendar;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -51,18 +50,24 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnNextCalendar = findViewById(R.id.btn_next_calendar); // 다음달 버튼
         ImageButton btnPreviousCalendar2 = findViewById(R.id.btn_previous_calendar2); //이전년 버튼
         ImageButton btnNextCalendar2 = findViewById(R.id.btn_next_calendar2); // 다음년 버튼
+        ImageButton btnToday = findViewById(R.id.btn_today);
 
-        //초기세팅
-        onResume();
-        selectedDate = today;
+        Calendar cal = Calendar.getInstance(Locale.KOREA);  //달력 객체
+        selectedDate = cCal.nToC(cal); //현재 날짜로 변환
+        String[] Today = selectedDate.split("-");
+        curYear = Integer.parseInt(Today[0]);
+        curMonth = Integer.parseInt(Today[1]);
+
+        drawCalendar(curYear, curMonth);  //오늘 날짜
 
         //월 이동 버튼
         btnPreviousCalendar.setOnClickListener(new View.OnClickListener(){ // 이전달 버튼이 눌리면
             @Override
             public void onClick(View view) {
                 if(curMonth <= 1){
-                    curYear -= 1; curMonth = 13;
+                    curYear -= 1; curMonth = cCal.MONTH_PER_YEAR;
                 } else { curMonth -= 1; }
+                changeYM(curYear, curMonth);
                 drawCalendar(curYear, curMonth);
             }
         });
@@ -70,9 +75,10 @@ public class MainActivity extends AppCompatActivity {
         btnNextCalendar.setOnClickListener(new View.OnClickListener(){ //다음달 버튼 눌리면
             @Override
             public void onClick(View view) {
-                if(curMonth == 13){
+                if(curMonth == cCal.MONTH_PER_YEAR){
                     curYear += 1; curMonth = 1;
                 } else { curMonth += 1; }
+                changeYM(curYear, curMonth);
                 drawCalendar(curYear, curMonth);
             }
         });
@@ -93,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 날짜 클릭 시
+        // 날짜 쉘 클릭 시
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() { // 날짜 중에 아무거나 선택하면
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -106,6 +112,20 @@ public class MainActivity extends AppCompatActivity {
                 calendarAdapter.notifyDataSetChanged();
             }
         });
+
+        //달력 모양 클릭 시 오늘 날짜
+        btnToday.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar calendar = Calendar.getInstance();
+                curYear = calendar.get(Calendar.YEAR);
+                curMonth = calendar.get(Calendar.MONTH) + 1;
+                String refresh = curYear + "-" + curMonth + "-" + calendar.get(Calendar.DATE);
+                setSelectedDate(refresh);
+                drawCalendar(curYear, curMonth);  //오늘 날짜
+                calendarAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     public void setSelectedDate(String date){
@@ -115,79 +135,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // 새로 고침 함수 오늘날짜 세팅해줌
-    @Override
-    public void onResume() {
-        super.onResume();
-        mThisMonthCalendar = Calendar.getInstance(Locale.KOREA);  //달력 객체
-        today = calConverter.convert12to13(mThisMonthCalendar); //현재 날짜로 변환
-
-        String[] Today = today.split("-");
-
-        curYear = Integer.parseInt(Today[0]);
-        curMonth = Integer.parseInt(Today[1]);
-
-        drawCalendar(curYear, curMonth);  //오늘 날짜
+    public void changeYM(int year, int month){
+        tvCalendarTitle.setText(year + "년 " + month + "월");
     }
+
 
     //13월 기준으로 13. 12 캘린더 그리는 함수
     @SuppressLint("SetTextI18n")
     public void drawCalendar(int year, int month) {
-
-        int dayOfWeek;
         arrayListDayInfo.clear();
 
         Calendar jen = Calendar.getInstance(Locale.KOREA);
         jen.set(year, 0, 1);
-        dayOfWeek = jen.get(Calendar.DAY_OF_WEEK);
+        int dayOfWeek = jen.get(Calendar.DAY_OF_WEEK);
 
         DayInfo day;
 
-        // 달력 앞 빈 쉘 처리
+        // 달력 앞 빈 칸
         if (dayOfWeek == 1) {
-            for (int i = 0; i < 6; i++) {
-               day = new DayInfo();
-               arrayListDayInfo.add(day);
+            for (int i = 0; i < cCal.DAY_PER_WEEK - (cCal.FIRST_WEEK-1); i++) {
+                day = new DayInfo();
+                arrayListDayInfo.add(day);
             }
-        } else {
-            for (int i = 0; i < dayOfWeek-2; i++) {
+        } else { //월화수목금토
+            for (int i = 0; i < dayOfWeek-cCal.FIRST_WEEK; i++) { //7-2
                 day = new DayInfo();
                 arrayListDayInfo.add(day);
             }
         }
 
-        // 숫자 쉘 그리기
-        if (month != 13) { // 1~12월
-            for (int i = 1; i <= 28; i++) {
+        // 숫자 쉘
+        if (month != cCal.MONTH_PER_YEAR) {
+            for (int i = 1; i <= cCal.DAY_PER_MONTH; i++) {
                 day = new DayInfo();
                 day.setDate(year, month ,i,true);
                 arrayListDayInfo.add(day);
             }
-        } else { // 13월
-            if (year % 4 == 0) { //윤년
-                for (int i = 1; i <= 30; i++) { //13월이 30일
-                    day = new DayInfo();
-                    day.setDate(year, month ,i,true);
-                    arrayListDayInfo.add(day);
-                }
-            } else {
-                for (int i = 1; i <= 29; i++) {
-                    day = new DayInfo();
-                    day.setDate(year, month ,i,true);
-                    arrayListDayInfo.add(day);
-                }
+        } else { // 마지막 달
+            for (int i = 1; i <= cCal.LAST_MONTH_DAY; i++) {
+                day = new DayInfo();
+                day.setDate(year, month ,i,true);
+                arrayListDayInfo.add(day);
             }
         }
 
-        // 달력 뒷부분 그리기
-        if (dayOfWeek == 1) {
+        // 달력 뒷부분 빈칸
+        int lastWeek = cCal.DAY_PER_WEEK - arrayListDayInfo.size() % cCal.DAY_PER_WEEK;
+        for(int i=0; i<lastWeek; i++) {
             day = new DayInfo();
             arrayListDayInfo.add(day);
-        } else {
-            for (int i = 0; i < 9-dayOfWeek; i++) {
-                day = new DayInfo();
-                arrayListDayInfo.add(day);
-            }
         }
 
         // 연, 월 그리기
