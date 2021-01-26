@@ -26,7 +26,7 @@ public class CustomCalendar {
 	//사용자에게 입력받아서 shared프러퍼런스에 넣을 요소들 
 	private static double RATIO = 0.3; // 마지막 달이 기본 달과 30퍼 이상 길어지면 이월. 1 입력시 이월 안됨. 0 입력 시 무조건 이월
 	public static int FIRST_WEEK = 2; //한주의 시작 요일
-	public static int DAY_PER_MONTH = 30; // 1달에 몇일인지
+	public static int DAY_PER_MONTH = 42; // 1달에 몇일인지
 	public static int DAY_PER_WEEK = 7; //1주일에 몇일인지
 
 	

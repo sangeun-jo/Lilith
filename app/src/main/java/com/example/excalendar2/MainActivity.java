@@ -3,6 +3,9 @@ package com.example.excalendar2;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -54,10 +57,11 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnNextCalendar = findViewById(R.id.btn_next_calendar); // 다음달 버튼
         ImageButton btnPreviousCalendar2 = findViewById(R.id.btn_previous_calendar2); //이전년 버튼
         ImageButton btnNextCalendar2 = findViewById(R.id.btn_next_calendar2); // 다음년 버튼
-        ImageButton btnToday = findViewById(R.id.btn_today);
+        //ImageButton btnToday = findViewById(R.id.btn_today);
 
         Calendar cal = Calendar.getInstance(Locale.KOREA);  //달력 객체
         selectedDate = cCal.nToC(cal); //현재 날짜로 변환
+
         String[] Today = selectedDate.split("-");
         curYear = Integer.parseInt(Today[0]);
         curMonth = Integer.parseInt(Today[1]);
@@ -117,10 +121,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //달력 모양 클릭 시 오늘 날짜
-        btnToday.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    }
+
+
+    //액션바 옵션 메뉴
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.home_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //오늘 날짜 클릭
+        switch(item.getItemId()) {
+            case R.id.select_date:
                 Calendar calendar = Calendar.getInstance();
                 curYear = calendar.get(Calendar.YEAR);
                 curMonth = calendar.get(Calendar.MONTH) + 1;
@@ -128,9 +144,13 @@ public class MainActivity extends AppCompatActivity {
                 setSelectedDate(refresh);
                 drawCalendar(curYear, curMonth);  //오늘 날짜
                 calendarAdapter.notifyDataSetChanged();
-            }
-        });
+                break;
+            case R.id.setting:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
+
 
     public void setSelectedDate(String date){
         selectedDate = date;

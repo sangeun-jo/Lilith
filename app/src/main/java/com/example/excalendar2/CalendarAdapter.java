@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +23,7 @@ public class CalendarAdapter extends BaseAdapter {
     public String selectedDate;
     public ArrayList<DayInfo> arrayListDayInfo;
     private CustomCalendar cCal = new CustomCalendar();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     //int first_week = 1; //월요일2, 일요일 1. 쉐어드 프로퍼런스 불러오기
 
     public CalendarAdapter(String selectedDate, ArrayList<DayInfo> arrayListDayInfo){ //생성자
@@ -48,6 +50,8 @@ public class CalendarAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         DayInfo day = arrayListDayInfo.get(position);
+        Calendar cal = Calendar.getInstance();
+        String today = sdf.format(cal.getTime());
 
         if(convertView == null) {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.day, parent, false);
@@ -56,15 +60,19 @@ public class CalendarAdapter extends BaseAdapter {
         if (day != null) {
             TextView tvDay12 = convertView.findViewById(R.id._12cal_day);
             TextView tvDay13 = convertView.findViewById(R.id.day_cell_tv_day);
-
-            ImageView ivSelected = convertView.findViewById(R.id.iv_selected);
+            //ImageView ivSelected = convertView.findViewById(R.id.iv_selected);
+            RelativeLayout bg = convertView.findViewById(R.id.day_cell_ll_background);
 
             if(day.isSameDay(selectedDate)){
-
-                ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
-            }else{
-                ivSelected.setVisibility(View.INVISIBLE); //선택된 날짜와 다른 날짜면 보이지 않게
+                bg.setBackgroundColor(Color.rgb(241, 241, 241));
+                //tvDay13.setBackgroundColor(Color.rgb(255, 193, 7));
+                //ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
+            } else{
+                bg.setBackgroundColor(Color.rgb(255, 255, 255));
+                //tvDay13.setBackgroundColor(Color.rgb(255, 255, 255));
+                //ivSelected.setVisibility(View.INVISIBLE); //선택된 날짜와 다른 날짜면 보이지 않게
             }
+
 
             if(day.inMonth){
                 SimpleDateFormat sdf = new SimpleDateFormat("M/d", Locale.KOREA);
@@ -75,7 +83,7 @@ public class CalendarAdapter extends BaseAdapter {
                     if((position % cCal.DAY_PER_WEEK) == 0){   //일요일이면
                         tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
                     } else if((position % cCal.DAY_PER_WEEK) == 6){ //토요일이면
-                        tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
+                        //tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
                     }else{ //나머지 날은 검정색
                         tvDay13.setTextColor(Color.BLACK);
                     }
@@ -83,21 +91,13 @@ public class CalendarAdapter extends BaseAdapter {
                     if((position % cCal.DAY_PER_WEEK) == 6){   //일요일이면
                         tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
                     } else if((position % cCal.DAY_PER_WEEK) == 5){ //토요일이면
-                        tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
+                        //tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
                     }else{ //나머지 날은 검정색
                         tvDay13.setTextColor(Color.BLACK);
                     }
                 }
 
-                /*
-                if((position % cCal.DAY_PER_WEEK) == 6){   //일요일이면
-                    tvDay13.setTextColor(Color.rgb(233, 30, 99)); //빨간색
-                } else if((position % cCal.DAY_PER_WEEK) == 5){ //토요일이면
-                    tvDay13.setTextColor(Color.rgb(33, 150, 245)); //파란색
-                }else{ //나머지 날은 검정색
-                    tvDay13.setTextColor(Color.BLACK);
-                }
-                */
+
                 tvDay12.setTextColor(Color.GRAY); //12월
 
 
