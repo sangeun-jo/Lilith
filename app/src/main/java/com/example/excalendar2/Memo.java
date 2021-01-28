@@ -1,23 +1,38 @@
 package com.example.excalendar2;
 
-public class Memo {
-    private String date;
-    private String memo;
+import io.realm.RealmObject;
+import io.realm.annotations.Required;
 
-    public Memo(String date, String memo){
+public class Memo extends RealmObject{
+
+    @Required
+    private String date; //날짜
+    private String content; //내용
+
+    public Memo(){
+
+    }
+
+    public Memo(String date, String content){
         this.date = date;
-        this.memo = memo;
-    }
-
-    public void setMemo(String memo) {
-        this.memo = memo;
-    }
-
-    public String getMemo(){
-        return memo;
+        this.content = content;
     }
 
     public String getDate(){
         return date;
     }
+
+    public void setDate(String date){
+        this.date = date;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getContent(String date) {
+        return content;
+    }
+
+
 }

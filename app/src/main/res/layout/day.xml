@@ -58,9 +58,9 @@
                     android:layout_alignParentBottom="true"
                     android:layout_marginHorizontal="4dp"
                     android:gravity="left"
-                    android:textColor="#FFC107"
                     android:textSize="8sp"
-                    tools:text="메모"/>
+                    android:textColor="#ffffff"
+                    android:text="Memo" />
             </LinearLayout>
 
 

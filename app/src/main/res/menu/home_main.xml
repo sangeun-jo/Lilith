@@ -6,11 +6,11 @@
         android:id="@+id/select_date"
         android:icon="@drawable/ic_baseline_today_24"
         android:title="Search"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/add_memo"
-        android:icon="@drawable/ic_baseline_add_circle_outline_24"
+        android:icon="@drawable/ic_baseline_edit_24"
         android:title="Search"
         app:showAsAction="ifRoom"/>
 

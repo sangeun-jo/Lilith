@@ -20,10 +20,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.Calendar;;
 import java.util.Locale;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 
 // 12월 달력을 기준으로 그리고, 밑에 조그맣게 정혈 주기 별 커스텀 달력으로 보이게 해야겠다.
@@ -50,9 +54,11 @@ public class MainActivity extends AppCompatActivity {
     private CalendarAdapter calendarAdapter; //캘린더 어댑터 객체
     private CustomCalendar cCal;
 
-    private SQLiteHelper dbHelper;
     private SharedPreferences pref;
     private ArrayList<DayInfo> arrayListDayInfo = new ArrayList<>();
+
+    private Realm realm;
+    public Memo memo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnNextCalendar2 = findViewById(R.id.btn_next_calendar2); // 다음년 버튼
 
 
-        dbHelper = new SQLiteHelper(this).getInstance(this);
-        dbHelper.open();
+        Realm.init(this);
+        realm = Realm.getDefaultInstance();
 
         //ImageButton btnToday = findViewById(R.id.btn_today);
 
@@ -135,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         // 날짜 쉘 클릭 시
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() { // 날짜 중에 아무거나 선택하면
             @Override
@@ -166,13 +171,7 @@ public class MainActivity extends AppCompatActivity {
         //오늘 날짜 클릭
         switch(item.getItemId()) {
             case R.id.select_date:
-                Calendar calendar = Calendar.getInstance();
-                curYear = calendar.get(Calendar.YEAR);
-                curMonth = calendar.get(Calendar.MONTH) + 1;
-                String refresh = curYear + "-" + curMonth + "-" + calendar.get(Calendar.DATE);
-                setSelectedDate(refresh);
-                drawCalendar(curYear, curMonth);  //오늘 날짜
-                calendarAdapter.notifyDataSetChanged();
+                setTodayDate();
                 break;
             case R.id.change_n:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -190,10 +189,10 @@ public class MainActivity extends AppCompatActivity {
                         if (et.getText().length() > 0){
                             dayPerMonth = Integer.parseInt(et.getText().toString()); //숫자 패드만 보이게 하기
                             if (14 <= dayPerMonth && dayPerMonth <= 180){
-                                Toast.makeText(getApplicationContext(),"변경사항을 적용하려면 다시 시작하세요", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),"Please Restart", Toast.LENGTH_LONG).show();
                                 pref.edit().putInt("dayPerMonth", dayPerMonth).apply();
                             } else{
-                                Toast.makeText(getApplicationContext(),"값이 올바르지 않습니다.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),"Wrong Value", Toast.LENGTH_LONG).show();
                             }
                         }
                     }
@@ -204,13 +203,13 @@ public class MainActivity extends AppCompatActivity {
                 alert.show();
                 break;
             case R.id.add_memo:
-                String title = today;
+                String c_date = today;
                 if (currCell != -1) {
-                    title = calendarAdapter.arrayListDayInfo.get(currCell).getDate();
+                    c_date = calendarAdapter.arrayListDayInfo.get(currCell).getDate();
                     //System.out.println(title);
                 }
                 //System.out.println("선택된 날짜: " + title);
-                showMemoDialog(title);
+                showMemoDialog(c_date);
                 break;
 
         }
@@ -224,29 +223,80 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setTodayDate(){
+        Calendar cal = Calendar.getInstance(Locale.KOREA);
+        cCal = new CustomCalendar(dayPerMonth);
+        today = cCal.nToC(cal);
+        setSelectedDate(today);
+        String Today[] = today.split("-");
+        drawCalendar(Integer.parseInt(Today[0]), Integer.parseInt(Today[1]));  //오늘 날짜
+        calendarAdapter.notifyDataSetChanged();
+    }
+
     public void changeYM(int year, int month){
-        tvCalendarTitle.setText(year + "년 " + month + "월");
+        tvCalendarTitle.setText(year + "." + month);
     }
 
     public void showMemoDialog(final String memoTitle) {
-        final MemoDialog dialog = new MemoDialog(this, memoTitle);
+        final String date = cCal.cToN(memoTitle);
+        final MemoDialog dialog = new MemoDialog(this, memoTitle, date);
         dialog.setContentView(R.layout.memo_dialog);
+
+        //에딧창 크기 조절
         WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams)params);
+
+        // 기존 메모 있으면 불러오기
         dialog.setDialogListener(new MemoDialog.myListener() {
 
             @Override
-            public void onPositiveClicked(String memoData) {
-                dbHelper.insertMemo(memoTitle, memoData);
+            public void onSaveClicked(final String memoData) {
+                realm.beginTransaction();
+                memo = realm.createObject(Memo.class);
+                memo.setDate(cCal.cToN(memoTitle));
+                memo.setContent(memoData);
+                realm.commitTransaction();
+                /*
+                realm.executeTransaction(new Realm.Transaction(){
+                    @Override
+                    public void execute(Realm realm) {
+                        final Memo results = realm.where(Memo.class).equalTo("date", date).
+                        if (results != null) { //이미 메모가 존재하는 경우 수정
+                            results.setContent(memoData);
+                        } else{ //없으면 생성
+                        }
+                    }
+                });
+
+                 */
+                setSelectedDate(date);
+                calendarAdapter.notifyDataSetChanged();
                 dialog.dismiss();
             }
             @Override
-            public void onNegativeClicked() {
+            public void onDeleteClicked() {
+                realm.executeTransaction(new Realm.Transaction(){
+                    @Override
+                    public void execute(Realm realm) {
+                        final RealmResults<Memo> results = realm.where(Memo.class).equalTo("date", date).findAll();
+                        if (results != null) {
+                            results.deleteAllFromRealm();
+                        }
+                        Toast.makeText(getApplicationContext(), "delete complete", Toast.LENGTH_LONG).show();
+                    }
+
+                });
+                drawCalendar(curYear, curMonth);
+                dialog.dismiss();
+            }
+            @Override
+            public void onCloseClicked(){
                 dialog.dismiss();
             }
         });
+        realm.close();
         dialog.show();
     }
 
@@ -301,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 연, 월 그리기
-        tvCalendarTitle.setText(year + "년 " + month + "월");
+        tvCalendarTitle.setText(year + "." + month);
 
         //그리드 뷰에 그리기
         calendarAdapter = new CalendarAdapter(this, selectedDate, arrayListDayInfo, dayPerMonth);

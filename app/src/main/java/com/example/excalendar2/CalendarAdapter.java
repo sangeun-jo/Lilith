@@ -17,6 +17,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import io.realm.Realm;
+import io.realm.RealmQuery;
+
 // 날 것의 배열을 화면에 뿌려줄 수 있도록 가공해주는 애
 
 
@@ -29,8 +32,8 @@ public class CalendarAdapter extends BaseAdapter {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private int dayPerMonth;
     private Context context;
-    private SQLiteHelper dbHelper;
-    //int first_week = 1; //월요일2, 일요일 1. 쉐어드 프로퍼런스 불러오기
+    public Memo MemoInfo;
+    private Realm realm;
 
     public CalendarAdapter(Context context, String selectedDate, ArrayList<DayInfo> arrayListDayInfo, int dayPerMonth){ //생성자
         this.context = context;
@@ -39,9 +42,8 @@ public class CalendarAdapter extends BaseAdapter {
         this.dayPerMonth = dayPerMonth;
         cCal = new CustomCalendar(dayPerMonth);
 
-        dbHelper = new SQLiteHelper(context).getInstance(context);
-        dbHelper.open();
-
+        Realm.init(context);
+        realm = Realm.getDefaultInstance();
     }
 
     @Override
@@ -76,10 +78,12 @@ public class CalendarAdapter extends BaseAdapter {
             TextView mark = convertView.findViewById(R.id.memo_mark);
             if(day.isSameDay(selectedDate)){
                 bg.setBackgroundColor(Color.rgb(241, 241, 241));
+                mark.setTextColor(Color.rgb(241, 241, 241));
                 //tvDay13.setBackgroundColor(Color.rgb(255, 193, 7));
                 //ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
             } else{
                 bg.setBackgroundColor(Color.rgb(255, 255, 255));
+                mark.setTextColor(Color.rgb(255, 255, 255));
                 //tvDay13.setBackgroundColor(Color.rgb(255, 255, 255));
                 //ivSelected.setVisibility(View.INVISIBLE); //선택된 날짜와 다른 날짜면 보이지 않게
             }
@@ -87,11 +91,15 @@ public class CalendarAdapter extends BaseAdapter {
 
             if(day.inMonth){
                 SimpleDateFormat sdf = new SimpleDateFormat("M/d", Locale.KOREA);
-                String date = sdf.format(day.get12DayCal(dayPerMonth).getTime());
-                if(dbHelper.loadMemoByDate(date) != null){
+                SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+                String date12 = sdf.format(day.get12DayCal(dayPerMonth).getTime()); //표시용 데이타
+                String date = sdf2.format(day.get12DayCal(dayPerMonth).getTime()); //검색용 12월 데이타
+                RealmQuery<Memo> memo = realm.where(Memo.class).equalTo("date", date);
+                if(memo.count() != 0){
                     mark.setBackgroundColor(Color.rgb(255, 193, 7));
+                    mark.setTextColor(Color.BLACK);
                 }
-                tvDay12.setText(date);
+                tvDay12.setText(date12);
                 tvDay13.setText(day.getDay());
 
                 //한주의 시작=월요일

@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.view.View;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -33,7 +34,7 @@ public class CustomCalendar {
 	
 	//생성자 
 	public CustomCalendar(int n) {
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance(Locale.KOREA);
 		this.YEAR = cal.YEAR;
 		this.MONTH = cal.MONTH;
 		this.DATE = cal.DATE;
@@ -93,6 +94,19 @@ public class CustomCalendar {
         cal.add(Calendar.DATE, stackedDays);
         return cal;
 	}
+
+	public String cToN(String date) {
+		String Date[] = date.split("-");
+		int year = Integer.parseInt(Date[0]);
+		int month = Integer.parseInt(Date[1]);
+		int day= Integer.parseInt(Date[2]);
+		int stackedDays = DAY_PER_MONTH * (month-1) + (day - 1); ;
+		Calendar cal = Calendar.getInstance();
+		cal.set(year, 0, 1);
+		cal.add(Calendar.DATE, stackedDays);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		return sdf.format(cal.getTime());
+	}
 	
 	//12 달력을 커스텀 달력으로 바꾸기
 	public CustomCalendar nToC(int year, int month, int date) { 
@@ -120,12 +134,19 @@ public class CustomCalendar {
 	public String nToC(Calendar cal) {
 
 		int stackedDays = cal.get(Calendar.DAY_OF_YEAR);
-		int c_mon;
-		if(cal.MONTH-1 == MONTH_PER_YEAR && CARRY) {
-			c_mon = stackedDays / DAY_PER_MONTH + 1;
+		int c_mon = stackedDays / DAY_PER_MONTH;
+		if(cal.MONTH-1 == MONTH_PER_YEAR && CARRY) { //마지막 달
+			c_mon = c_mon + 2;
 		} else {
-			c_mon = (int) stackedDays / DAY_PER_MONTH;
+			if(stackedDays % DAY_PER_MONTH != 0){
+				c_mon = (int) (stackedDays / DAY_PER_MONTH) + 1;
+			}
 		}
+
+
+		// 28/28 = 1    56/28 = 2
+		// 28/50 = 0
+
 
 		int c_date;
 		if (stackedDays % DAY_PER_MONTH == 0){
