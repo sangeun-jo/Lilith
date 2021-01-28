@@ -48,10 +48,21 @@
                     android:layout_alignParentBottom="true"
                     android:layout_marginHorizontal="4dp"
                     android:gravity="left"
-                    android:textColor="#FF5722"
+                    android:textColor="#F1F1F1"
                     android:textSize="8sp"
                     tools:text="1/1"/>
+                <TextView
+                    android:id="@+id/memo_mark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginHorizontal="4dp"
+                    android:gravity="left"
+                    android:textColor="#FFC107"
+                    android:textSize="8sp"
+                    tools:text="메모"/>
             </LinearLayout>
+
 
 
 

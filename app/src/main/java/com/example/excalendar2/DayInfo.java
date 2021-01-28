@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+
+//메모 객체 추가하기
+
 //13월 기준 객체
 public class DayInfo {
     private String date;
@@ -25,8 +28,8 @@ public class DayInfo {
     }
 
     //12월 날짜로 변환해서 Calendar 객체로 반환
-    public Calendar get12DayCal(){
-        CustomCalendar cCal = new CustomCalendar();
+    public Calendar get12DayCal(int n){
+        CustomCalendar cCal = new CustomCalendar(n);
         Calendar cal12 = cCal.cToN(y, m, d);
         //CalendarConverter calendarConverter = new CalendarConverter();
         //Calendar cal12 = calendarConverter.convert13to12(y,m,d);
@@ -42,4 +45,5 @@ public class DayInfo {
         boolean sameDay = date1.equals(this.date);
         return sameDay;
     }
+
 }
