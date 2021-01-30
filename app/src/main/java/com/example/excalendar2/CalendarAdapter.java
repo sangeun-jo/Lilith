@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmQuery;
+import io.realm.RealmResults;
 
 // 날 것의 배열을 화면에 뿌려줄 수 있도록 가공해주는 애
 
@@ -94,8 +95,8 @@ public class CalendarAdapter extends BaseAdapter {
                 SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
                 String date12 = sdf.format(day.get12DayCal(dayPerMonth).getTime()); //표시용 데이타
                 String date = sdf2.format(day.get12DayCal(dayPerMonth).getTime()); //검색용 12월 데이타
-                RealmQuery<Memo> memo = realm.where(Memo.class).equalTo("date", date);
-                if(memo.count() != 0){
+                RealmResults<Memo> memo = realm.where(Memo.class).equalTo("date", date).findAll();
+                if(!memo.isEmpty()){
                     mark.setBackgroundColor(Color.rgb(255, 193, 7));
                     mark.setTextColor(Color.BLACK);
                 }

@@ -30,7 +30,7 @@ public class Memo extends RealmObject{
         this.content = content;
     }
 
-    public String getContent(String date) {
+    public String getContent() {
         return content;
     }
 

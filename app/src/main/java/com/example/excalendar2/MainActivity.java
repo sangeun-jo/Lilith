@@ -54,11 +54,12 @@ public class MainActivity extends AppCompatActivity {
     private CalendarAdapter calendarAdapter; //캘린더 어댑터 객체
     private CustomCalendar cCal;
 
+    private DBHelper dbHelper;
     private SharedPreferences pref;
     private ArrayList<DayInfo> arrayListDayInfo = new ArrayList<>();
 
     private Realm realm;
-    public Memo memo;
+    private Memo memo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         Realm.init(this);
-        realm = Realm.getDefaultInstance();
-
+        //realm = Realm.getDefaultInstance();
+        //dbHelper = new DBHelper(this);
         //ImageButton btnToday = findViewById(R.id.btn_today);
 
         Calendar cal = Calendar.getInstance(Locale.KOREA);  //달력 객체
@@ -177,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 final EditText et = new EditText(this);
                 builder.setView(et);
-                builder.setMessage("14일 이상~180이하");
+                builder.setMessage("Please enter a day between 14 and 180");
                 builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -206,9 +207,7 @@ public class MainActivity extends AppCompatActivity {
                 String c_date = today;
                 if (currCell != -1) {
                     c_date = calendarAdapter.arrayListDayInfo.get(currCell).getDate();
-                    //System.out.println(title);
                 }
-                //System.out.println("선택된 날짜: " + title);
                 showMemoDialog(c_date);
                 break;
 
@@ -247,31 +246,27 @@ public class MainActivity extends AppCompatActivity {
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.height = WindowManager.LayoutParams.WRAP_CONTENT;
         dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams)params);
-
+        realm = Realm.getDefaultInstance();
         // 기존 메모 있으면 불러오기
         dialog.setDialogListener(new MemoDialog.myListener() {
-
             @Override
             public void onSaveClicked(final String memoData) {
+                Memo results = realm.where(Memo.class).equalTo("date", date).findFirst();
                 realm.beginTransaction();
-                memo = realm.createObject(Memo.class);
-                memo.setDate(cCal.cToN(memoTitle));
-                memo.setContent(memoData);
-                realm.commitTransaction();
-                /*
-                realm.executeTransaction(new Realm.Transaction(){
-                    @Override
-                    public void execute(Realm realm) {
-                        final Memo results = realm.where(Memo.class).equalTo("date", date).
-                        if (results != null) { //이미 메모가 존재하는 경우 수정
-                            results.setContent(memoData);
-                        } else{ //없으면 생성
-                        }
+                if (results == null) {
+                    if(memoData != null){
+                        memo = realm.createObject(Memo.class);
+                        memo.setDate(cCal.cToN(memoTitle));
+                        memo.setContent(memoData);
+                    } else{
+                        Toast.makeText(getApplicationContext(), "empty value", Toast.LENGTH_LONG).show();
                     }
-                });
-
-                 */
-                setSelectedDate(date);
+                } else{
+                    results.setContent(memoData);
+                    Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_LONG).show();
+                }
+                realm.commitTransaction();
+                //setSelectedDate(date);
                 calendarAdapter.notifyDataSetChanged();
                 dialog.dismiss();
             }
@@ -281,18 +276,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void execute(Realm realm) {
                         final RealmResults<Memo> results = realm.where(Memo.class).equalTo("date", date).findAll();
-                        if (results != null) {
+                        if (!results.isEmpty()) {
                             results.deleteAllFromRealm();
                         }
-                        Toast.makeText(getApplicationContext(), "delete complete", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "deleted", Toast.LENGTH_LONG).show();
                     }
 
                 });
                 drawCalendar(curYear, curMonth);
-                dialog.dismiss();
-            }
-            @Override
-            public void onCloseClicked(){
                 dialog.dismiss();
             }
         });

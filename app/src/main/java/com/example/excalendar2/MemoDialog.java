@@ -19,7 +19,6 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
     private EditText editMemo;
     private Button saveBtn;
     private Button deleteBtn;
-    private Button closeBtn;
 
     private Context context;
     private String title; //커스텀
@@ -40,7 +39,6 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
     public interface myListener{
         void onSaveClicked(String memoData);
         void onDeleteClicked();
-        void onCloseClicked();
     }
 
     //호출할 리스너 초기화
@@ -59,11 +57,10 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
 
         //init
         memoTitle = findViewById(R.id.memo_date);
-        memoTitle.setText(title);
+        memoTitle.setText(title + "(" + date + ")");
         editMemo = findViewById(R.id.edit_memo);
         saveBtn = (Button) findViewById(R.id.save_memo);
         deleteBtn = (Button) findViewById(R.id.delete_memo);
-        closeBtn = findViewById(R.id.close);
 
 
         realm.executeTransaction(new Realm.Transaction(){
@@ -71,7 +68,7 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
             public void execute(Realm realm) {
                 final Memo results = realm.where(Memo.class).equalTo("date", date).findFirst();
                 if (results != null) {
-                    String content = results.getContent(date);
+                    String content = results.getContent();
                     editMemo.setText(content);
                 }
             }
@@ -82,7 +79,6 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
         //버튼 클릭 리스너 등록
         saveBtn.setOnClickListener(this); //각 액티비티에서 리스너 생성시 기본 함수로 등록
         deleteBtn.setOnClickListener(this);
-        closeBtn.setOnClickListener(this);
         //액티비티에서 Override 하여 액티비티마다 다르게 동작시키게 할 수 있음
     }
 
@@ -101,11 +97,6 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
                 break;
             case R.id.delete_memo:
                 myListener.onDeleteClicked();
-                break;
-
-            case R.id.close:
-                // 뒤로 가기
-                myListener.onCloseClicked();
                 break;
         }
     }

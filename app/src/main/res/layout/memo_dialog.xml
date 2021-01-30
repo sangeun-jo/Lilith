@@ -15,8 +15,6 @@
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:gravity="left|center"
-            android:paddingLeft="10dp"
-            android:textColor="#000000"
             android:textSize="18dp"
             android:layout_weight="4"
             android:text="N력(12월력) 메모">
@@ -55,23 +53,14 @@
             android:textColor="#FFC107" />
 
         <Button
-            android:id="@+id/close"
+            android:id="@+id/save_memo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#00ff0000"
             android:padding="10dp"
-            android:text="Close"
+            android:text="Save"
             android:layout_weight="1"
             android:textColor="@color/colorPrimary" />
-        <Button
-        android:id="@+id/save_memo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#00ff0000"
-        android:padding="10dp"
-        android:text="Save"
-        android:layout_weight="1"
-        android:textColor="@color/colorPrimary" />
 
     </LinearLayout>
 
