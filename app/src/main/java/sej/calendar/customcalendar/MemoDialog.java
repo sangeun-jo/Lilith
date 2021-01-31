@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.excalendar2.R;
+import sej.calendar.customcalendar.R;
 
 import io.realm.Realm;
 

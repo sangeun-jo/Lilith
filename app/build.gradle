@@ -6,7 +6,7 @@ android {
     buildToolsVersion "30.0.1"
 
     defaultConfig {
-        applicationId "com.example.excalendar2"
+        applicationId "sej.calendar.customcalendar"
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 1

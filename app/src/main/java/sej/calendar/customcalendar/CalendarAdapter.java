@@ -9,7 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.excalendar2.R;
+import sej.calendar.customcalendar.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

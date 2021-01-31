@@ -3,8 +3,6 @@ package sej.calendar.customcalendar;
 import java.util.Calendar;
 
 
-//메모 객체 추가하기
-
 //13월 기준 객체
 public class DayInfo {
     private String date;

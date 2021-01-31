@@ -20,7 +20,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.excalendar2.R;
+import sej.calendar.customcalendar.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;
