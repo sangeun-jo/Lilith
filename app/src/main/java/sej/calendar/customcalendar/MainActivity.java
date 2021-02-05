@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         Realm.init(this);
 
-        Calendar cal = Calendar.getInstance(Locale.KOREA);  //달력 객체
+        Calendar cal = Calendar.getInstance(Locale.getDefault());  //달력 객체
 
         pref = getSharedPreferences("Pref", MODE_PRIVATE);
         dayPerMonth = pref.getInt("dayPerMonth", 28);
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setTodayDate(){
-        Calendar cal = Calendar.getInstance(Locale.KOREA);
+        Calendar cal = Calendar.getInstance(Locale.getDefault());
         cCal = new CustomCalendar(dayPerMonth);
         today = cCal.nToC(cal);
         setSelectedDate(today);
@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
         arrayListDayInfo.clear();
 
         cCal.setYear(year);
-        Calendar jen = Calendar.getInstance(Locale.KOREA);
+        Calendar jen = Calendar.getInstance(Locale.getDefault());
         jen.set(year, 0, 1);
         int dayOfWeek = jen.get(Calendar.DAY_OF_WEEK);
 

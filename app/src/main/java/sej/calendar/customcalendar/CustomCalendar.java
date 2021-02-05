@@ -28,7 +28,7 @@ public class CustomCalendar {
 	
 	//생성자 
 	public CustomCalendar(int n) {
-		Calendar cal = Calendar.getInstance(Locale.KOREA);
+		Calendar cal = Calendar.getInstance(Locale.getDefault());
 		this.YEAR = cal.YEAR;
 		this.MONTH = cal.MONTH;
 		this.DATE = cal.DATE;
@@ -83,7 +83,7 @@ public class CustomCalendar {
 	public Calendar cToN(int year, int month, int date) { 
 		int stackedDays = DAY_PER_MONTH * (month-1) + (date - 1); ; 
         System.out.println(stackedDays);
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(Locale.getDefault());
         cal.set(year, 0, 1);
         cal.add(Calendar.DATE, stackedDays);
         return cal;
@@ -95,17 +95,17 @@ public class CustomCalendar {
 		int month = Integer.parseInt(Date[1]);
 		int day= Integer.parseInt(Date[2]);
 		int stackedDays = DAY_PER_MONTH * (month-1) + (day - 1); ;
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance(Locale.getDefault());
 		cal.set(year, 0, 1);
 		cal.add(Calendar.DATE, stackedDays);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 		return sdf.format(cal.getTime());
 	}
 	
 	//12 달력을 커스텀 달력으로 바꾸기
 	public CustomCalendar nToC(int year, int month, int date) { 
 		
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance(Locale.getDefault());
 		cal.set(year, month-1, date);
     	
 		int stackedDays = cal.get(Calendar.DAY_OF_YEAR);

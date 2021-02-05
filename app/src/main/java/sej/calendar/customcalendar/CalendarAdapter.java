@@ -88,8 +88,8 @@ public class CalendarAdapter extends BaseAdapter {
 
 
             if(day.inMonth){
-                SimpleDateFormat sdf = new SimpleDateFormat("M/d", Locale.KOREA);
-                SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+                SimpleDateFormat sdf = new SimpleDateFormat("M/d", Locale.getDefault());
+                SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String date12 = sdf.format(day.get12DayCal(dayPerMonth).getTime()); //표시용 데이타
                 String date = sdf2.format(day.get12DayCal(dayPerMonth).getTime()); //검색용 12월 데이타
                 RealmResults<Memo> memo = realm.where(Memo.class).equalTo("date", date).findAll();
