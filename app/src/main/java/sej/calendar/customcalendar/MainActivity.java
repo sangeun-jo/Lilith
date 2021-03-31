@@ -38,6 +38,8 @@ import io.realm.RealmResults;
 // 메뉴-오늘, 정혈 달력, 통계, 설정
 // 요일 레이블 추가, 시작 요일 선택에 따라 바뀌게 하기
 
+//구
+
 public class MainActivity extends AppCompatActivity {
 
     private int curYear; //13월 달력 기준 년
@@ -79,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnNextCalendar = findViewById(R.id.btn_next_calendar); // 다음달 버튼
         ImageButton btnPreviousCalendar2 = findViewById(R.id.btn_previous_calendar2); //이전년 버튼
         ImageButton btnNextCalendar2 = findViewById(R.id.btn_next_calendar2); // 다음년 버튼
-
 
         Realm.init(this);
 
