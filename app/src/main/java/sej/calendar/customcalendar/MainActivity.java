@@ -1,18 +1,15 @@
 package sej.calendar.customcalendar;
 
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -20,14 +17,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import sej.calendar.customcalendar.R;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import sej.calendar.customcalendar.ui.SettingsActivity;
 
 ;
 
@@ -173,42 +169,16 @@ public class MainActivity extends AppCompatActivity {
             case R.id.select_date:
                 setTodayDate();
                 break;
-            case R.id.change_n:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                final EditText et = new EditText(this);
-                et.setInputType(InputType.TYPE_CLASS_NUMBER);
-                builder.setView(et);
-                builder.setMessage("Please enter a day between 14 and 180");
-                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                builder.setPositiveButton("confirm", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (et.getText().length() > 0){
-                            dayPerMonth = Integer.parseInt(et.getText().toString()); //숫자 패드만 보이게 하기
-                            if (14 <= dayPerMonth && dayPerMonth <= 180){
-                                Toast.makeText(getApplicationContext(),"Please restart", Toast.LENGTH_LONG).show();
-                                pref.edit().putInt("dayPerMonth", dayPerMonth).apply();
-                            } else{
-                                Toast.makeText(getApplicationContext(),"Wrong value", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }
-
-                });
-                AlertDialog alert = builder.create();
-                alert.setTitle("Change day per month"); // dialog  Title
-                alert.show();
-                break;
             case R.id.add_memo:
                 String c_date = today;
                 if (currCell != -1) {
                     c_date = calendarAdapter.arrayListDayInfo.get(currCell).getDate();
                 }
                 showMemoDialog(c_date);
+                break;
+            case R.id.settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
 
         }

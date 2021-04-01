@@ -13,7 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="sej.calendar.customcalendar.MainActivity">
+        <activity android:name=".ui.AuthActivity"></activity>
+        <activity android:name=".ui.SettingsActivity" />
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,4 +24,7 @@
         </activity>
     </application>
 
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
 </manifest>
