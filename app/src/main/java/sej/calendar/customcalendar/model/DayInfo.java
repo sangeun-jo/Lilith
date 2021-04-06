@@ -1,6 +1,8 @@
-package sej.calendar.customcalendar;
+package sej.calendar.customcalendar.model;
 
 import java.util.Calendar;
+
+import sej.calendar.customcalendar.CalendarConverter;
 
 
 //13월 기준 객체
@@ -21,7 +23,7 @@ public class DayInfo {
 
     //12월 날짜로 변환해서 Calendar 객체로 반환
     public Calendar get12DayCal(int n){
-        CustomCalendar cCal = new CustomCalendar(n);
+        CalendarConverter cCal = new CalendarConverter(n);
         Calendar cal12 = cCal.cToN(y, m, d);
         //CalendarConverter calendarConverter = new CalendarConverter();
         //Calendar cal12 = calendarConverter.convert13to12(y,m,d);

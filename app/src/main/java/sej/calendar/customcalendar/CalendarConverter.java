@@ -5,7 +5,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 // 윤년 제대로 계산 안됨
-public class CustomCalendar {
+public class CalendarConverter {
 	
 	public int YEAR;
 	public int MONTH;
@@ -27,7 +27,7 @@ public class CustomCalendar {
 
 	
 	//생성자 
-	public CustomCalendar(int n) {
+	public CalendarConverter(int n) {
 		Calendar cal = Calendar.getInstance(Locale.getDefault());
 		this.YEAR = cal.YEAR;
 		this.MONTH = cal.MONTH;
@@ -103,8 +103,7 @@ public class CustomCalendar {
 	}
 	
 	//12 달력을 커스텀 달력으로 바꾸기
-	public CustomCalendar nToC(int year, int month, int date) { 
-		
+	public CalendarConverter nToC(int year, int month, int date) {
 		Calendar cal = Calendar.getInstance(Locale.getDefault());
 		cal.set(year, month-1, date);
     	
@@ -119,7 +118,7 @@ public class CustomCalendar {
 
 		int c_date = stackedDays % DAY_PER_MONTH;  
 		
-		CustomCalendar ccal = new CustomCalendar(DAY_PER_MONTH);
+		CalendarConverter ccal = new CalendarConverter(DAY_PER_MONTH);
 		ccal.set(year, c_mon, c_date);
 	
 		return ccal; 

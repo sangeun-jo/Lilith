@@ -8,35 +8,37 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import sej.calendar.customcalendar.R;
-
 import io.realm.Realm;
+import sej.calendar.customcalendar.model.Memo;
 
 public class MemoDialog extends Dialog implements View.OnClickListener{
 
-    private TextView memoTitle;
+    private TextView memoDate;
     private EditText editMemo;
     private Button saveBtn;
     private Button deleteBtn;
 
     private Context context;
-    private String title; //커스텀
-    private String date; //12월
+    private String customDate; //커스텀
+    private String date12; //12월
+    private EditText title;
+    private EditText category;
+
     private myListener myListener;
 
     private Realm realm;
 
-    public MemoDialog(Context context, String title, String date) {
+    public MemoDialog(Context context, String customDate, String date12) {
         super(context);
         this.context = context;
-        this.title = title;
-        this.date = date;
+        this.customDate = customDate;
+        this.date12 = date12;
     }
 
 
     //인터페이스 설정
     public interface myListener{
-        void onSaveClicked(String memoData);
+        void onSaveClicked(String category, String title, String content);
         void onDeleteClicked();
     }
 
@@ -51,13 +53,15 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.memo_dialog);
 
-        Realm.init(context);
+        //Realm.init(context);
         realm = Realm.getDefaultInstance();
 
         //init
-        memoTitle = findViewById(R.id.memo_date);
-        memoTitle.setText(title + "(" + date + ")");
+        memoDate = findViewById(R.id.memo_date);
+        memoDate.setText(customDate + "(" + date12 + ")");
         editMemo = findViewById(R.id.edit_memo);
+        title = findViewById(R.id.memo_title);
+        category = findViewById(R.id.memo_category);
         saveBtn = (Button) findViewById(R.id.save_memo);
         deleteBtn = (Button) findViewById(R.id.delete_memo);
 
@@ -65,10 +69,11 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
         realm.executeTransaction(new Realm.Transaction(){
             @Override
             public void execute(Realm realm) {
-                final Memo results = realm.where(Memo.class).equalTo("date", date).findFirst();
+                final Memo results = realm.where(Memo.class).equalTo("date", date12).findFirst();
                 if (results != null) {
-                    String content = results.getContent();
-                    editMemo.setText(content);
+                    editMemo.setText(results.getContent());
+                    title.setText(results.getTitle());
+                    category.setText(results.getCategory());
                 }
             }
 
@@ -85,14 +90,29 @@ public class MemoDialog extends Dialog implements View.OnClickListener{
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.save_memo:
-                String memoData;
+                String category;
+                String title;
+                String content;
                 if(editMemo.getText().length() > 0){
-                    memoData = editMemo.getText().toString();
+                    content = editMemo.getText().toString();
                 } else{
-                    memoData = null;
+                    content = "no content";
                 }
+
+                if(this.title.getText().length() > 0){
+                    title = this.title.getText().toString();
+                } else{
+                    title = "no title";
+                }
+
+                if(this.title.getText().length() > 0){
+                    category = this.title.getText().toString();
+                } else{
+                    category = "no category";
+                }
+
                 //인터페이스의 함수를 호출하여 변수에 저장된 값들을 Activity로 전달
-                myListener.onSaveClicked(memoData);
+                myListener.onSaveClicked(category, title, content);
                 break;
             case R.id.delete_memo:
                 myListener.onDeleteClicked();

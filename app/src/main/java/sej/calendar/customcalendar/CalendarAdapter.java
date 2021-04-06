@@ -1,6 +1,5 @@
 package sej.calendar.customcalendar;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,14 +8,13 @@ import android.widget.BaseAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import sej.calendar.customcalendar.R;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
+import sej.calendar.customcalendar.model.DayInfo;
+import sej.calendar.customcalendar.model.Memo;
 
 // 날 것의 배열을 화면에 뿌려줄 수 있도록 가공해주는 애
 
@@ -26,21 +24,18 @@ public class CalendarAdapter extends BaseAdapter {
 
     public String selectedDate;
     public ArrayList<DayInfo> arrayListDayInfo;
-    private CustomCalendar cCal;
+    private CalendarConverter cCal;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private int dayPerMonth;
-    private Context context;
-    public Memo MemoInfo;
     private Realm realm;
 
-    public CalendarAdapter(Context context, String selectedDate, ArrayList<DayInfo> arrayListDayInfo, int dayPerMonth){ //생성자
-        this.context = context;
+    public CalendarAdapter(String selectedDate, ArrayList<DayInfo> arrayListDayInfo, int dayPerMonth){ //생성자
         this.selectedDate = selectedDate;
         this.arrayListDayInfo = arrayListDayInfo;
         this.dayPerMonth = dayPerMonth;
-        cCal = new CustomCalendar(dayPerMonth);
+        cCal = new CalendarConverter(dayPerMonth);
 
-        Realm.init(context);
+        //Realm.init(context);
         realm = Realm.getDefaultInstance();
     }
 
@@ -92,9 +87,10 @@ public class CalendarAdapter extends BaseAdapter {
                 SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 String date12 = sdf.format(day.get12DayCal(dayPerMonth).getTime()); //표시용 데이타
                 String date = sdf2.format(day.get12DayCal(dayPerMonth).getTime()); //검색용 12월 데이타
-                RealmResults<Memo> memo = realm.where(Memo.class).equalTo("date", date).findAll();
-                if(!memo.isEmpty()){
+                Memo memo = realm.where(Memo.class).equalTo("date", date).findFirst();
+                if(memo != null){
                     mark.setBackgroundColor(Color.rgb(255, 193, 7));
+                    mark.setText(memo.getTitle());
                     mark.setTextColor(Color.BLACK);
                 }
                 tvDay12.setText(date12);
@@ -124,9 +120,7 @@ public class CalendarAdapter extends BaseAdapter {
                 tvDay12.setText("");
                 tvDay13.setText("");
             }
-
             convertView.setTag(day);
-
             return convertView; //데이터를 뿌린 뷰를 반환함
         }
 
