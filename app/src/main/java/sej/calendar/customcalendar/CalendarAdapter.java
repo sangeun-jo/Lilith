@@ -76,7 +76,7 @@ public class CalendarAdapter extends BaseAdapter {
                 //ivSelected.setVisibility(View.VISIBLE); //선택된 날짜와 같은 날짜면 보이게
             } else{
                 bg.setBackgroundColor(Color.rgb(255, 255, 255));
-                mark.setTextColor(Color.rgb(255, 255, 255));
+                mark.setText("");
                 //tvDay13.setBackgroundColor(Color.rgb(255, 255, 255));
                 //ivSelected.setVisibility(View.INVISIBLE); //선택된 날짜와 다른 날짜면 보이지 않게
             }

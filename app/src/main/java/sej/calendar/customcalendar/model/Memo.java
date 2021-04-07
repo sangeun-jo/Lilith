@@ -7,7 +7,7 @@ public class Memo extends RealmObject{
 
     @Required
     private String date; //날짜
-    private String category; //카테고리
+    private String calendar; //카테고리
     private String title; //제목
     private String content; //내용
 
@@ -32,12 +32,12 @@ public class Memo extends RealmObject{
         return title;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCalendar(String calendar) {
+        this.calendar = calendar;
     }
 
-    public String getCategory() {
-        return category;
+    public String getCalendar() {
+        return calendar;
     }
 
     public void setDate(String date){

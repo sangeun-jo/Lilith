@@ -18,7 +18,7 @@ public class Migration implements RealmMigration{
             RealmObjectSchema mMemoSchema = schema.get("Memo");
 
             mMemoSchema.addField("title", String.class, null);
-            mMemoSchema.addField("category", String.class, null);
+            mMemoSchema.addField("calendar", String.class, null);
             oldVersion++;
         }
     }

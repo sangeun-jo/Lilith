@@ -5,11 +5,11 @@ import java.util.Calendar;
 import sej.calendar.customcalendar.CalendarConverter;
 
 
-//13월 기준 객체
+//커스텀 달력 기준
 public class DayInfo {
     private String date;
     int y, m, d;
-    public boolean inMonth = false;
+    public boolean inMonth = false; //비어있는 날짜인지 판단
 
     public void setDate(int year, int month, int day, boolean inMonth){
         y = year; m = month; d = day;
