@@ -81,8 +81,7 @@ public class CalendarConverter {
 	
 	//커스텀 달력을 12 달력으로 바꾸기
 	public Calendar cToN(int year, int month, int date) { 
-		int stackedDays = DAY_PER_MONTH * (month-1) + (date - 1); ; 
-        //System.out.println(stackedDays);
+		int stackedDays = DAY_PER_MONTH * (month-1) + (date - 1); ;
         Calendar cal = Calendar.getInstance(Locale.getDefault());
         cal.set(year, 0, 1);
         cal.add(Calendar.DATE, stackedDays);
@@ -136,10 +135,8 @@ public class CalendarConverter {
 			}
 		}
 
-
 		// 28/28 = 1    56/28 = 2
 		// 28/50 = 0
-
 
 		int c_date;
 		if (stackedDays % DAY_PER_MONTH == 0){

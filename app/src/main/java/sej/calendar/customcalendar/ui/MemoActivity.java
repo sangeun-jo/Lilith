@@ -21,7 +21,7 @@ public class MemoActivity extends AppCompatActivity {
 
     private Realm realm;
 
-    private TextView memoDate;
+    //private TextView memoDate;
     private EditText memoTitle;
     private EditText calendar;
     private EditText editMemo;
@@ -30,43 +30,38 @@ public class MemoActivity extends AppCompatActivity {
 
     private String date12; //12월
 
+    private Memo exitMemo;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
 
-        //백 화살표
-        ActionBar mActionbar = getSupportActionBar();
-        mActionbar.setDisplayHomeAsUpEnabled(true);
-
-
         Intent intent = getIntent();
         date12 = intent.getStringExtra("date12");
         String customDate = intent.getStringExtra("customDate");
 
-        memoDate = findViewById(R.id.memo_date);
-        memoDate.setText(customDate + "(" + date12 + ")");
         editMemo = findViewById(R.id.edit_memo);
         memoTitle = findViewById(R.id.memo_title);
-        calendar = findViewById(R.id.google_calendar);
+        calendar = findViewById(R.id.select_calendar);
         saveBtn = (Button) findViewById(R.id.save_memo);
         deleteBtn = (Button) findViewById(R.id.delete_memo);
 
-        realm = Realm.getDefaultInstance();
-        realm.executeTransaction(new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                final Memo results = realm.where(Memo.class).equalTo("date", date12).findFirst();
-                if (results != null) {
-                    editMemo.setText(results.getContent());
-                    memoTitle.setText(results.getTitle());
-                    calendar.setText(results.getCalendar());
-                }
-            }
+        //백 화살표
+        ActionBar mActionbar = getSupportActionBar();
+        mActionbar.setDisplayHomeAsUpEnabled(true);
+        mActionbar.setTitle(customDate + "(" + date12 + ")");
 
-        });
-        realm.close();
+        realm = Realm.getDefaultInstance();
+
+        exitMemo = realm.where(Memo.class).equalTo("date", date12).findFirst();
+
+        if (exitMemo != null) {
+            editMemo.setText(exitMemo.getContent());
+            memoTitle.setText(exitMemo.getTitle());
+            calendar.setText(exitMemo.getCalendar());
+        }
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,7 +75,6 @@ public class MemoActivity extends AppCompatActivity {
         deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                realm = Realm.getDefaultInstance();
                 realm.executeTransaction(new Realm.Transaction(){
                     @Override
                     public void execute(Realm realm) {
@@ -90,13 +84,11 @@ public class MemoActivity extends AppCompatActivity {
                         }
                     }
                 });
-                realm.close();
-
+                realm.commitTransaction();
                 setResult(1002);
                 finish();
             }
         });
-
     }
 
     //백 화살표 눌렸을 때 닫힘
@@ -113,45 +105,30 @@ public class MemoActivity extends AppCompatActivity {
     //메모 입력
     public void editMemo(String date12) {
 
-        String cal;
-        String title;
-        String content;
+        String cal = (calendar.getText().length() > 0) ? calendar.getText().toString():"custom calendar";
+        String title = (memoTitle.getText().length() > 0) ? memoTitle.getText().toString():"no title";
+        String content = (editMemo.getText().length() > 0 ) ? editMemo.getText().toString():"no content";
 
-        if(editMemo.getText().length() > 0){
-            content = editMemo.getText().toString();
-        } else{
-            content = "no content";
-        }
-
-        if(memoTitle.getText().length() > 0){
-            title = memoTitle.getText().toString();
-        } else{
-            title = "no title";
-        }
-
-        if(calendar.getText().length() > 0){
-            cal = calendar.getText().toString();
-        } else{
-            cal = "custom calendar";
-        }
-
-        realm = Realm.getDefaultInstance();
-        Memo results = realm.where(Memo.class).equalTo("date", date12).findFirst();
         Memo memo;
 
         realm.beginTransaction();
-        if (results == null) { // 메모 없었던 경우 저장
+        if (exitMemo == null) { // 메모 없었던 경우 저장
             memo = realm.createObject(Memo.class);
             memo.setDate(date12);
             memo.setCalendar(cal);
             memo.setTitle(title);
             memo.setContent(content);
-        } else{ //메모가 원래 있었던 경우
-            results.setCalendar(results.getCalendar());
-            results.setTitle(results.getTitle());
-            results.setContent(results.getContent());
+        } else{ //메모가 원래 있었던 경우 입력된 값으로 새로 저장
+            exitMemo.setCalendar(cal);
+            exitMemo.setTitle(title);
+            exitMemo.setContent(content);
         }
         realm.commitTransaction();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         realm.close();
     }
 }

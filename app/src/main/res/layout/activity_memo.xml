@@ -4,24 +4,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="10dp">
-
-        <TextView
-            android:id="@+id/memo_date"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:gravity="left|center"
-            android:textSize="18dp"
-            android:layout_weight="4"
-            android:text="N력(12월력) 메모">
-        </TextView>
-
-
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,11 +11,6 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_marginHorizontal="10dp">
-        <EditText
-            android:id="@+id/google_calendar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
 
         <EditText
             android:id="@+id/memo_title"
@@ -84,5 +61,20 @@
             android:textColor="@color/colorPrimary" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_margin="10dp">
+        <EditText
+            android:id="@+id/select_calendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+
 
 </LinearLayout>

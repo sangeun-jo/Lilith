@@ -1,6 +1,4 @@
-package sej.calendar.customcalendar;
-
-import android.content.Context;
+package sej.calendar.customcalendar.dao;
 
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;

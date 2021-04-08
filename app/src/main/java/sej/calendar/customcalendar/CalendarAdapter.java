@@ -89,7 +89,6 @@ public class CalendarAdapter extends BaseAdapter {
                 String date = sdf2.format(day.get12DayCal(dayPerMonth).getTime()); //검색용 12월 데이타
                 Memo memo = realm.where(Memo.class).equalTo("date", date).findFirst();
                 if(memo != null){
-                    mark.setBackgroundColor(Color.rgb(255, 193, 7));
                     mark.setText(memo.getTitle());
                     mark.setTextColor(Color.BLACK);
                 }
@@ -126,4 +125,5 @@ public class CalendarAdapter extends BaseAdapter {
 
         return null;
     }
+
 }

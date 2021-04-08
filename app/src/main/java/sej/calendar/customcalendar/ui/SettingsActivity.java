@@ -1,15 +1,9 @@
 package sej.calendar.customcalendar.ui;
 
-import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.MenuItem;
@@ -39,7 +33,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         // 메뉴 리스트
         String [] str = {
-                "Google calendar Syn",
+                "Google calendar syn",
                 "Change day per month",
                 "information"
         };

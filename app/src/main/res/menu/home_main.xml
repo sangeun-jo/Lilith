@@ -9,22 +9,9 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/add_memo"
-        android:icon="@drawable/ic_baseline_edit_24"
-        android:title="Search"
-        app:showAsAction="ifRoom"/>
-
-    <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_baseline_settings_24"
         app:showAsAction="ifRoom"
         android:title="setting" />
 
-    <!--
-    <item
-        android:id="@+id/change_n"
-        android:orderInCategory="100"
-        android:title="change day per month"
-        app:showAsAction="never" />
-    -->
 </menu>

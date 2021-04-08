@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
     private GridView gridView;
     private TextView tvCalendarTitle;
-    private TextView dateTitle;
     //private TextView tvSelectedDate;
 
     private CalendarAdapter calendarAdapter; //캘린더 어댑터 객체
@@ -59,10 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences pref;
     private ArrayList<DayInfo> arrayListDayInfo = new ArrayList<>();
-
-    private Realm realm;
-    private Memo memo;
-
 
 
     @Override
@@ -73,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         tvCalendarTitle = findViewById(R.id.tv_calendar_title); //제목
-        dateTitle = findViewById(R.id.memo_date);
         //tvSelectedDate = findViewById(R.id.iv_selected);
         gridView = findViewById(R.id.gv_calendar);  //그리드 뷰
         gridView.setNumColumns(7);
@@ -190,13 +184,6 @@ public class MainActivity extends AppCompatActivity {
         switch(item.getItemId()) {
             case R.id.select_date: //오늘 날짜버튼 클릭
                 setTodayDate();
-                break;
-            case R.id.add_memo:
-                String c_date = today;
-                if (currCell != -1) {
-                    c_date = calendarAdapter.arrayListDayInfo.get(currCell).getDate();
-                }
-                //showMemoDialog(c_date);
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
