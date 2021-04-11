@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/google_login"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="구글 로그인"
+                android:layout_weight="1">
+            </Button>
+            <Button
+                android:id="@+id/google_logout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="구글 로그아웃"
+                android:layout_weight="1">
+            </Button>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="선택된 계정 없음">
+        </TextView>
+        <Button
+            android:id="@+id/google_calendar_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="달력 가져오기">
+        </Button>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="선택된 달력">
+        </TextView>
+    </LinearLayout>
+</LinearLayout>

@@ -70,6 +70,33 @@ public class GoogleCalendar {
         return id;
     }
 
+
+    public List<String> getCalendarList() throws IOException, UserRecoverableAuthIOException{
+        List<String> result = new ArrayList<>();
+        String pageToken = null;
+        do {
+            CalendarList calendarList = null;
+            calendarList = mService.calendarList().list().setPageToken(pageToken).execute();
+            List<CalendarListEntry> items = calendarList.getItems();
+            for(int i =0; i < items.size(); i++) {
+                result.add(items.get(i).getSummary()) ;
+            }
+            pageToken = calendarList.getNextPageToken();
+        } while (pageToken != null);
+        return result;
+    }
+
+
+
+    public Observable<List<CalendarListEntry>> readCalendar() {
+        return Observable.create((ObservableOnSubscribe<List<CalendarListEntry>>) e -> {
+            CalendarList calendarList = mService.calendarList().list().execute();
+            e.onNext(calendarList.getItems());
+            e.onComplete();
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+
     private String createCalendar() throws IOException {
         String ids = getCalendarID("Custom Calendar");
         if ( ids != null ){

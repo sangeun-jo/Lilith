@@ -44,11 +44,8 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
         this.calendarTaskListener = calendarTaskListener;
     }
 
+    //이 액티비티를 상속해서 사용하는 액티비티는 인증정보를 생성해서 써야함
     GoogleAccountCredential mCredential = null;
-
-    public void setCredential(GoogleAccountCredential mCredential) {
-        this.mCredential = mCredential;
-    }
 
     public void setViewId(int viewId) {
         this.viewId = viewId;
@@ -56,7 +53,6 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
 
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
     void chooseAccount() {
-        System.out.println("chooseAccount() 실행");
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
             startActivityForResult(mCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
@@ -86,11 +82,9 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
-                System.out.println("REQUEST_ACCOUNT_PICKER 실행");
                 if (resultCode == RESULT_OK && data != null && data.getExtras() != null) {
                     String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (accountName != null) {
-                        System.out.println(accountName  + " 계정 선택됨");
                         mCredential.setSelectedAccountName(accountName);
                         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
@@ -117,21 +111,19 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
         }
     }
 
+
     //캘린더 작업이 가능한지 조건 따지는 애
     protected final void isCalendarTaskAvailable(int viewId) {
-        System.out.println("isCalendarTaskAvailable 도착");
         this.viewId = viewId;
         if (!isGooglePlayServicesAvailable()) { //1. 구글 플레이 서비스 사용가능한지 확인
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) { //2. 계정 선택 안됨
             chooseAccount();
-            //calendarTaskListener.onErrorCalendarTask("먼저 구글 계정을 선택해주세요");
         } else if (!isDeviceOnline()) { //3. 온라인 상태 확인
             if(calendarTaskListener != null)
                 calendarTaskListener.onErrorCalendarTask("No network connection available.");
         } else { // 캘린더 작업 가능!!
             if(calendarTaskListener != null)
-                System.out.println("캘린더 작업 가능!");
                 calendarTaskListener.onAvailableCalendarTask(viewId);
         }
     }
@@ -152,10 +144,6 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
         return connectionStatusCode == ConnectionResult.SUCCESS;
     }
 
-    /**
-     * Attempt to resolve a missing, out-of-date, invalid or disabled Google
-     * Play Services installation via a user dialog, if possible.
-     */
     private void acquireGooglePlayServices() {
         GoogleApiAvailability apiAvailability =
                 GoogleApiAvailability.getInstance();
@@ -165,7 +153,6 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
             showGooglePlayServicesAvailabilityErrorDialog(connectionStatusCode);
         }
     }
-
 
     void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
