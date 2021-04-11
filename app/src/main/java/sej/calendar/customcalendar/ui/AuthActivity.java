@@ -2,6 +2,8 @@ package sej.calendar.customcalendar.ui;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -70,8 +72,7 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
         } else {
             googleCalendar.setText("Please choose calendar");
         }
-
-
+        // 구글 로그인 끝
 
         selectAccount.setOnClickListener(v -> {
             setViewId(v.getId());
@@ -84,32 +85,12 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
     }
 
-
-    //달력 가져오는 핸들러
-    class CalendarListThread extends Thread{
-        @Override
-        public void run() {
-            GoogleCalendar googleCalendar = GoogleCalendar.build(mCredential);
-            try {
-                calList = googleCalendar.getCalendarList();
-            } catch (UserRecoverableAuthIOException e) {
-                startActivityForResult(e.getIntent(), REQUEST_AUTHORIZATION);
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println("달력 가져오기 완료!");
-            // 메인에서 생성된 Handler 객체의 sendEmpryMessage 를 통해 Message 전달
-            handler.sendEmptyMessage(0);
-        }
-    }
-
     //메인 스레드 핸들러
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case 0:
-                    System.out.println("다중선택창 보여주기!");
                     showCalendarList(calList);
 
             }
@@ -120,10 +101,15 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
     @Override
     public void onAvailableCalendarTask(int viewId) {
-        System.out.println("현재 계정" +  mCredential.getSelectedAccountName());
         switch (viewId) {
             case R.id.btn_select_account:
-                googleAccount.setText(mCredential.getSelectedAccountName());
+                SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("savedAccount", mCredential.getSelectedAccountName());
+                editor.putString("savedCalendar", null);
+                editor.apply();
+                googleAccount.setText(mCredential.getSelectedAccountName()); //뷰 모델로 바꿔보자
+                googleCalendar.setText("Please choose calendar");
                 break;
             case R.id.btn_select_calendar:
                 CalendarListThread calendarListThread = new CalendarListThread();
@@ -133,6 +119,7 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
         }
     }
 
+    //달력 목록 보여주는 다이얼로그
     public void showCalendarList(List<String> calendarList) {
         if (calendarList.size() == 0) {
             Toast.makeText(this, "Calendar is not exist in this account", Toast.LENGTH_LONG);
@@ -143,15 +130,35 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                 android.R.style.Theme_DeviceDefault_Light_Dialog_Alert);
 
         oDialog.setTitle("Choose calendar")
-                .setItems(calList, (dialog, which) -> Toast.makeText(getApplicationContext(),
-                        calList[which], Toast.LENGTH_LONG).show())
+                .setItems(calList, (dialog, which) -> {
+                    //Toast.makeText(getApplicationContext(), calList[which], Toast.LENGTH_LONG).show();
+                    SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString("savedCalendar",calList[which]);
+                    editor.apply();
+                    googleCalendar.setText(calList[which]);
+                })
                 .setCancelable(false)
                 .show();
     }
 
     @Override
     public void onErrorCalendarTask(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
+    //달력 가져오는 핸들러
+    class CalendarListThread extends Thread{
+        @Override
+        public void run() {
+            GoogleCalendar googleCalendar = GoogleCalendar.build(mCredential);
+            try {
+                calList = googleCalendar.getCalendarList();
+            } catch (Exception e) {
+                handleCommonThrowable(e);
+            }
+            handler.sendEmptyMessage(0);
+        }
     }
 
 }
