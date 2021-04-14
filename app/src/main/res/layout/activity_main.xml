@@ -36,7 +36,7 @@
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="@{() -> calendarViewModel.nextMonth()}"
+                android:onClick="@{() -> calendarViewModel.preMonth()}"
                 android:background="#ffffff"
                 app:srcCompat="@drawable/ic_left" />
 
@@ -56,7 +56,7 @@
                 android:layout_width="50dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="@{() -> calendarViewModel.preMonth()}"
+                android:onClick="@{() -> calendarViewModel.nextMonth()}"
                 android:background="#ffffff"
                 app:srcCompat="@drawable/ic_right" />
 

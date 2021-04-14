@@ -129,8 +129,9 @@ public class MainActivity extends AppCompatActivity {
         //오늘 날짜 클릭
         switch(item.getItemId()) {
             case R.id.select_date: //오늘 날짜버튼 클릭
+                binding.getCalendarViewModel().setToday();
                 calendarAdapter.setSelectedDate(today);
-                calendarAdapter.notifyDataSetChanged();
+                //calendarAdapter.notifyDataSetChanged();
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
