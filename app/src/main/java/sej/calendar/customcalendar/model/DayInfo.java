@@ -6,6 +6,8 @@ import sej.calendar.customcalendar.CalendarConverter;
 
 
 //커스텀 달력 기준
+
+//12월 달력도 가지고 
 public class DayInfo {
     private String date;
     int y, m, d;
@@ -21,15 +23,6 @@ public class DayInfo {
         return Integer.toString(d);
     }
 
-    //12월 날짜로 변환해서 Calendar 객체로 반환
-    public Calendar get12DayCal(int n){
-        CalendarConverter cCal = new CalendarConverter(n);
-        Calendar cal12 = cCal.cToN(y, m, d);
-        //CalendarConverter calendarConverter = new CalendarConverter();
-        //Calendar cal12 = calendarConverter.convert13to12(y,m,d);
-        return cal12;
-    }
-
     public String getDate(){
         return this.date;
     }
@@ -39,5 +32,11 @@ public class DayInfo {
         boolean sameDay = date1.equals(this.date);
         return sameDay;
     }
+
+    /*
+    public void setDate12(String date12) {
+        this.date12 = date12
+    }
+    * */
 
 }

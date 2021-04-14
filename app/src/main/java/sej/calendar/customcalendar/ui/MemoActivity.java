@@ -21,7 +21,6 @@ public class MemoActivity extends AppCompatActivity {
 
     private Realm realm;
 
-    //private TextView memoDate;
     private EditText memoTitle;
     private EditText calendar;
     private EditText editMemo;
@@ -72,18 +71,13 @@ public class MemoActivity extends AppCompatActivity {
             }
         });
 
+        //삭제 시 에러 발생
         deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                realm.executeTransaction(new Realm.Transaction(){
-                    @Override
-                    public void execute(Realm realm) {
-                        RealmResults<Memo> exitMemo = realm.where(Memo.class).equalTo("date", date12).findAll();
-                        if (!exitMemo.isEmpty()) {
-                            exitMemo.deleteAllFromRealm();
-                        }
-                    }
-                });
+                realm.beginTransaction();
+                RealmResults<Memo> exitMemo = realm.where(Memo.class).equalTo("date", date12).findAll();
+                exitMemo.deleteAllFromRealm();
                 realm.commitTransaction();
                 setResult(1002);
                 finish();

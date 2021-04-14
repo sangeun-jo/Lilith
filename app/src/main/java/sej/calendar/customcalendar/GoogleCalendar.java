@@ -20,13 +20,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
 /**
  * Created by Administrator on 2017-05-26.
  */
@@ -87,16 +80,6 @@ public class GoogleCalendar {
     }
 
 
-
-    public Observable<List<CalendarListEntry>> readCalendar() {
-        return Observable.create((ObservableOnSubscribe<List<CalendarListEntry>>) e -> {
-            CalendarList calendarList = mService.calendarList().list().execute();
-            e.onNext(calendarList.getItems());
-            e.onComplete();
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
-    }
-
-
     private String createCalendar() throws IOException {
         String ids = getCalendarID("Custom Calendar");
         if ( ids != null ){
@@ -125,5 +108,7 @@ public class GoogleCalendar {
         // 새로 추가한 캘린더의 ID를 리턴
         return "Custom Calendar Created";
     }
+
+
 
 }

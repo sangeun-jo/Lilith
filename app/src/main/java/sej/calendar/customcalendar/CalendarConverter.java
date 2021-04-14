@@ -88,7 +88,7 @@ public class CalendarConverter {
         return cal;
 	}
 
-	public String cToN(String date) {
+	public Calendar cToN(String date) {
 		String Date[] = date.split("-");
 		int year = Integer.parseInt(Date[0]);
 		int month = Integer.parseInt(Date[1]);
@@ -97,8 +97,7 @@ public class CalendarConverter {
 		Calendar cal = Calendar.getInstance(Locale.getDefault());
 		cal.set(year, 0, 1);
 		cal.add(Calendar.DATE, stackedDays);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-		return sdf.format(cal.getTime());
+		return cal;
 	}
 	
 	//12 달력을 커스텀 달력으로 바꾸기
