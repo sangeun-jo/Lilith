@@ -20,12 +20,15 @@ import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.realm.Realm;
 import sej.calendar.customcalendar.GoogleCalendar;
 import sej.calendar.customcalendar.R;
+import sej.calendar.customcalendar.model.Memo;
 
 
 //뷰모델로 바꾸기
@@ -43,8 +46,14 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
     Handler handler;
 
+    Realm realm;
 
+
+
+    ArrayList<Memo> eventList = new ArrayList<>();
     List<String> calList = new ArrayList<>();
+
+    GoogleCalendar googleTask;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +70,11 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
         mCredential = GoogleAccountCredential.usingOAuth2(
                 this, Collections.singleton(CalendarScopes.CALENDAR))
                 .setBackOff(new ExponentialBackOff());
+
+        String selectedCalendar = getPreferences(Context.MODE_PRIVATE).getString("savedCalendar", "Please choose calendar");
+        googleCalendar.setText(selectedCalendar);
+
+        googleTask = GoogleCalendar.build(mCredential);
 
         GoogleAuthThread googleAuthThread = new GoogleAuthThread();
         googleAuthThread.start();
@@ -80,7 +94,6 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                 switch (msg.what){
                     case 0:
                         showCalendarList(calList);
-
                 }
 
             }
@@ -108,6 +121,7 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
         }
     }
 
+
     //달력 목록 보여주는 다이얼로그
     public void showCalendarList(List<String> calendarList) {
         if (calendarList.size() == 0) {
@@ -125,23 +139,47 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                     editor.putString("savedCalendar",calList[which]);
                     editor.apply();
                     googleCalendar.setText(calList[which]);
+                    CalendarEventThread calendarEventThread = new CalendarEventThread(googleCalendar.getText().toString());
+                    calendarEventThread.start();
                 })
                 .setCancelable(false)
                 .show();
+
+
     }
 
     @Override
     public void onErrorCalendarTask(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+       //Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    //이벤트 가져오는 핸들러
+    class CalendarEventThread extends Thread {
+        private String calTitle;
+
+        public CalendarEventThread(String calTitle) {
+            this.calTitle = calTitle;
+        }
+
+        @Override
+        public void run() {
+            try {
+                String calendarId = googleTask.getCalendarID(calTitle);
+                googleTask.getEvent(calendarId);
+                System.out.println("불러오기 완료");
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     //달력 가져오는 핸들러
     class CalendarListThread extends Thread{
         @Override
         public void run() {
-            GoogleCalendar googleCalendar = GoogleCalendar.build(mCredential);
             try {
-                calList = googleCalendar.getCalendarList();
+                calList = googleTask.getCalendarList();
             } catch (Exception e) {
                 handleCommonThrowable(e);
             }
@@ -168,6 +206,8 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                 googleCalendar.setText("Please choose calendar");
             }
         }
+
+
     }
 
 }

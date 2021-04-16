@@ -10,12 +10,10 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
 
 import io.realm.Realm;
-import sej.calendar.customcalendar.model.DayInfo;
-import sej.calendar.customcalendar.model.Memo;
+import sej.calendar.customcalendar.model.DayView;
 
 // 날 것의 배열을 화면에 뿌려줄 수 있도록 가공해주는 애
 
@@ -24,23 +22,19 @@ import sej.calendar.customcalendar.model.Memo;
 public class CalendarAdapter extends BaseAdapter {
 
     private String selectedDate;
-    private ArrayList<DayInfo> arrayListDayInfo;
+    private ArrayList<DayView> arrayListDayInfo;
     private CalendarConverter converter;
 
     SimpleDateFormat md = new SimpleDateFormat("M/d", Locale.getDefault());
     SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-    private Realm realm;
-
-    public CalendarAdapter(ArrayList<DayInfo> arrayListDayInfo, String selectedDate, CalendarConverter converter){ //생성자
+    public CalendarAdapter(ArrayList<DayView> arrayListDayInfo, String selectedDate, CalendarConverter converter){ //생성자
         this.arrayListDayInfo = arrayListDayInfo;
         this.selectedDate = selectedDate;
         this.converter = converter;
-
-        realm = Realm.getDefaultInstance();
     }
 
-    public void setCalList(ArrayList<DayInfo> arrayListDayInfo) {
+    public void setCalList(ArrayList<DayView> arrayListDayInfo) {
         this.arrayListDayInfo = arrayListDayInfo;
     }
 
@@ -70,7 +64,7 @@ public class CalendarAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        DayInfo day = arrayListDayInfo.get(position);
+        DayView day = arrayListDayInfo.get(position);
 
         if(convertView == null) {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.day, parent, false);
@@ -90,15 +84,17 @@ public class CalendarAdapter extends BaseAdapter {
                 mark.setText("");
             }
 
-            if(day.inMonth){
-                Date date12 = converter.cToN(day.getDate()).getTime();
-                Memo memo = realm.where(Memo.class).equalTo("date", ymd.format(date12)).findFirst();
-                if(memo != null){
-                    mark.setText(memo.getTitle());
+            if(!day.isEmpty){
+                String date12 = day.getNormalDate();
+
+                if(day.getMemo() != null) {
+                    System.out.println(day.getMemo().getTitle());
+                    mark.setText(day.getMemo().getTitle());
                     mark.setTextColor(Color.BLACK);
                 }
-                tvDay12.setText(md.format(date12));
-                tvDay13.setText(day.getDay());
+
+                tvDay12.setText(date12);
+                tvDay13.setText(day.getCustomD());
 
                 //한주의 시작=월요일
                 if((position % 7) == 6){   //일요일이면

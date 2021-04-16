@@ -7,7 +7,6 @@ public class Memo extends RealmObject{
 
     @Required
     private String date; //날짜
-    private String calendar; //카테고리
     private String title; //제목
     private String content; //내용
 
@@ -30,14 +29,6 @@ public class Memo extends RealmObject{
 
     public String getTitle() {
         return title;
-    }
-
-    public void setCalendar(String calendar) {
-        this.calendar = calendar;
-    }
-
-    public String getCalendar() {
-        return calendar;
     }
 
     public void setDate(String date){

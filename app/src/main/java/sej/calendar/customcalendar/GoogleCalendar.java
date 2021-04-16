@@ -15,10 +15,17 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
+
+import io.realm.Realm;
+import sej.calendar.customcalendar.model.Memo;
 
 /**
  * Created by Administrator on 2017-05-26.
@@ -27,6 +34,11 @@ import java.util.TimeZone;
 public class GoogleCalendar {
 
     private com.google.api.services.calendar.Calendar mService = null;
+
+    SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    SimpleDateFormat ymdhms = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSSX", Locale.getDefault());
+
+    Realm realm;
 
     private GoogleCalendar(com.google.api.services.calendar.Calendar mService) {
         this.mService = mService;
@@ -45,7 +57,6 @@ public class GoogleCalendar {
 
     public String getCalendarID(String calendarTitle) throws IOException {
         String id = null;
-
         // Iterate through entries in calendar list
         String pageToken = null;
         do {
@@ -63,6 +74,25 @@ public class GoogleCalendar {
         return id;
     }
 
+    public void getEvent(String calendarId) throws IOException, ParseException {
+        realm = Realm.getDefaultInstance();
+        String pageToken = null;
+
+        do {
+            Events events = mService.events().list(calendarId).setPageToken(pageToken).execute();
+            List<Event> items = events.getItems();
+            for (Event event : items) {
+                //realm.beginTransaction();
+                Memo memo = realm.createObject(Memo.class);
+                Date datetime = ymdhms.parse(event.getCreated().toString());
+                memo.setDate(ymd.format(datetime.getTime()));
+                memo.setTitle(event.getSummary());
+                memo.setContent(event.getDescription());
+                //realm.commitTransaction();
+            }
+            pageToken = events.getNextPageToken();
+        } while (pageToken != null);
+    }
 
     public List<String> getCalendarList() throws IOException, UserRecoverableAuthIOException{
         List<String> result = new ArrayList<>();

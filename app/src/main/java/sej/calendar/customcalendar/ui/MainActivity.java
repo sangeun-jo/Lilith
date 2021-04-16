@@ -7,11 +7,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,8 +23,8 @@ import sej.calendar.customcalendar.CalendarAdapter;
 import sej.calendar.customcalendar.CalendarConverter;
 import sej.calendar.customcalendar.CalendarViewModel;
 import sej.calendar.customcalendar.databinding.ActivityMainBinding;
-import sej.calendar.customcalendar.model.DayInfo;
 import sej.calendar.customcalendar.R;
+import sej.calendar.customcalendar.model.DayView;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -78,9 +73,9 @@ public class MainActivity extends AppCompatActivity {
         binding.gvCalendar.setAdapter(calendarAdapter);
 
         binding.gvCalendar.setOnItemClickListener((adapterView, view, i, l) -> {
-            DayInfo clickedDay = (DayInfo)view.getTag();
-            String customDate = clickedDay.getDate();
-            if(clickedDay.inMonth){
+            DayView clickedDay = (DayView)view.getTag();
+            String customDate = clickedDay.getCustomYMD();
+            if(!clickedDay.isEmpty){
                 if(customDate.equals(calendarAdapter.getSelectedDate())) {
                     Intent intent = new Intent(getApplicationContext(), MemoActivity.class);
                     intent.putExtra("customDate", customDate);
@@ -96,9 +91,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void observe() {
-        binding.getCalendarViewModel().calendarList.observe(this, new Observer<ArrayList<DayInfo>>() {
+        binding.getCalendarViewModel().calendarList.observe(this, new Observer<ArrayList<DayView>>() {
             @Override
-            public void onChanged(ArrayList<DayInfo> objects) {
+            public void onChanged(ArrayList<DayView> objects) {
                 calendarAdapter.setCalList(binding.getCalendarViewModel().getCalList());
                 calendarAdapter.notifyDataSetChanged();
             }
@@ -131,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.select_date: //오늘 날짜버튼 클릭
                 binding.getCalendarViewModel().setToday();
                 calendarAdapter.setSelectedDate(today);
-                //calendarAdapter.notifyDataSetChanged();
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
@@ -151,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (resultCode == 1002) {
                 Toast.makeText(this, "deleted", Toast.LENGTH_LONG).show();
             }
+            binding.getCalendarViewModel().setCalendarList();
             calendarAdapter.notifyDataSetChanged();
         }
     }
