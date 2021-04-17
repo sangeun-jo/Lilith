@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.util.ExponentialBackOff;
@@ -48,8 +49,6 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
     Realm realm;
 
-
-
     ArrayList<Memo> eventList = new ArrayList<>();
     List<String> calList = new ArrayList<>();
 
@@ -71,7 +70,7 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                 this, Collections.singleton(CalendarScopes.CALENDAR))
                 .setBackOff(new ExponentialBackOff());
 
-        String selectedCalendar = getPreferences(Context.MODE_PRIVATE).getString("savedCalendar", "Please choose calendar");
+        String selectedCalendar = getSharedPreferences("pref", MODE_PRIVATE).getString("savedCalendar", "Please choose calendar");
         googleCalendar.setText(selectedCalendar);
 
         googleTask = GoogleCalendar.build(mCredential);
@@ -105,10 +104,10 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
     public void onAvailableCalendarTask(int viewId) {
         switch (viewId) {
             case R.id.btn_select_account:
-                SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences settings = getSharedPreferences("pref", MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("savedAccount", mCredential.getSelectedAccountName());
-                editor.putString("savedCalendar", null);
+                editor.putString("savedCalendar", "Please Choose Calendar");
                 editor.apply();
                 googleAccount.setText(mCredential.getSelectedAccountName()); //뷰 모델로 바꿔보자
                 googleCalendar.setText("Please choose calendar");
@@ -134,18 +133,17 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
         oDialog.setTitle("Choose calendar")
                 .setItems(calList, (dialog, which) -> {
-                    SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences settings = getSharedPreferences("pref", MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("savedCalendar",calList[which]);
+                    editor.putString("savedCalendar", calList[which]);
                     editor.apply();
                     googleCalendar.setText(calList[which]);
-                    CalendarEventThread calendarEventThread = new CalendarEventThread(googleCalendar.getText().toString());
-                    calendarEventThread.start();
+                    Toast.makeText(this, calList[which] + " selected", Toast.LENGTH_LONG).show();
+                    //CalendarEventThread calendarEventThread = new CalendarEventThread(googleCalendar.getText().toString());
+                    //calendarEventThread.start();
                 })
                 .setCancelable(false)
                 .show();
-
-
     }
 
     @Override
@@ -153,26 +151,30 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
        //Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
+
+
     //이벤트 가져오는 핸들러
     class CalendarEventThread extends Thread {
         private String calTitle;
-
         public CalendarEventThread(String calTitle) {
             this.calTitle = calTitle;
         }
-
         @Override
         public void run() {
             try {
                 String calendarId = googleTask.getCalendarID(calTitle);
-                googleTask.getEvent(calendarId);
-                System.out.println("불러오기 완료");
+                googleTask.getEventByDate(calendarId);
+                setResult(2000);
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
+            } catch (UserRecoverableAuthException e) {
+
             }
 
         }
     }
+
+
 
     //달력 가져오는 핸들러
     class CalendarListThread extends Thread{
@@ -190,8 +192,8 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
     class GoogleAuthThread extends Thread {
         @Override
         public void run() {
-            savedAccount = getPreferences(Context.MODE_PRIVATE).getString("savedAccount", null);
-            savedCalendar = getPreferences(Context.MODE_PRIVATE).getString("savedCalendar", null);
+            savedAccount = getSharedPreferences("pref", MODE_PRIVATE).getString("savedAccount", null);
+            savedCalendar = getSharedPreferences("pref", MODE_PRIVATE).getString("savedCalendar", null);
             mCredential.setSelectedAccountName(savedAccount);
 
             if(savedAccount != null) {
@@ -206,9 +208,10 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                 googleCalendar.setText("Please choose calendar");
             }
         }
-
-
     }
+
+
+
 
 }
 

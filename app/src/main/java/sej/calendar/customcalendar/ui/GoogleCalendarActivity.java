@@ -190,8 +190,7 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
                                 .getConnectionStatusCode());
             } else if (throwable instanceof UserRecoverableAuthIOException) {
                 startActivityForResult(
-                        ((UserRecoverableAuthIOException) throwable).getIntent(),
-                        REQUEST_AUTHORIZATION);
+                        ((UserRecoverableAuthIOException) throwable).getIntent(), REQUEST_AUTHORIZATION);
             } else {
                 if(calendarTaskListener != null)
                     calendarTaskListener.onErrorCalendarTask("The following error occurred:\n" + throwable.getMessage());

@@ -12,22 +12,36 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import sej.calendar.customcalendar.CalendarAdapter;
 import sej.calendar.customcalendar.CalendarConverter;
 import sej.calendar.customcalendar.CalendarViewModel;
+import sej.calendar.customcalendar.GoogleCalendar;
 import sej.calendar.customcalendar.databinding.ActivityMainBinding;
 import sej.calendar.customcalendar.R;
 import sej.calendar.customcalendar.model.DayView;
+import sej.calendar.customcalendar.model.Memo;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
 
 
 // 12월 달력을 기준으로 그리고, 밑에 조그맣게 정혈 주기 별 커스텀 달력으로 보이게 해야겠다.
@@ -36,7 +50,7 @@ import androidx.lifecycle.ViewModelProviders;
 // 메뉴-오늘, 정혈 달력, 통계, 설정
 // 요일 레이블 추가, 시작 요일 선택에 따라 바뀌게 하기
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends GoogleCalendarActivity {
 
     public static int dayPerMonth; //한달 일수
 
@@ -46,28 +60,42 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private CalendarViewModel calendarViewModel;
 
-    SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private GoogleCalendar googleTask;
+
+    private String savedCalendar;
+
+    private ArrayList<Memo> eventList;
+
+    SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setLifecycleOwner(this);
-
         binding.gvCalendar.setNumColumns(7);
 
         realmConfig();
 
-        SharedPreferences pref = getSharedPreferences("Pref", MODE_PRIVATE);
-        dayPerMonth = pref.getInt("dayPerMonth", 28);
-
+        SharedPreferences sf = getSharedPreferences("pref", MODE_PRIVATE);
+        dayPerMonth = sf.getInt("dayPerMonth", 28);
         converter = new CalendarConverter(dayPerMonth);
 
         today = converter.nToC(Calendar.getInstance(Locale.getDefault()));
 
         calendarViewModel = ViewModelProviders.of(this).get(CalendarViewModel.class);
         binding.setCalendarViewModel(calendarViewModel);
+
+        String savedAccount = sf.getString("savedAccount", null);
+        savedCalendar = sf.getString("savedCalendar", null);
+        GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
+                this, Collections.singleton(CalendarScopes.CALENDAR))
+                .setBackOff(new ExponentialBackOff());
+
+        googleTask = GoogleCalendar.build(credential);
+
+        binding.getCalendarViewModel().setBefore(credential, savedAccount, savedCalendar, converter);
 
         calendarAdapter = new CalendarAdapter(binding.getCalendarViewModel().getCalList(), today, converter);
         binding.gvCalendar.setAdapter(calendarAdapter);
@@ -86,22 +114,21 @@ public class MainActivity extends AppCompatActivity {
                 calendarAdapter.notifyDataSetChanged();
             }
         });
+        
         observe();
 
     }
 
     private void observe() {
-        binding.getCalendarViewModel().calendarList.observe(this, new Observer<ArrayList<DayView>>() {
-            @Override
-            public void onChanged(ArrayList<DayView> objects) {
-                calendarAdapter.setCalList(binding.getCalendarViewModel().getCalList());
-                calendarAdapter.notifyDataSetChanged();
-            }
+        binding.getCalendarViewModel().calendarList.observe(this, objects -> {
+            calendarAdapter.setCalList(binding.getCalendarViewModel().getCalList());
+            calendarAdapter.notifyDataSetChanged();
         });
     }
 
+
     public void realmConfig(){
-        Realm.init(this);
+        Realm.init(getApplicationContext());
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .deleteRealmIfMigrationNeeded()
                 //.schemaVersion(1)
@@ -131,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 break;
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -145,6 +171,13 @@ public class MainActivity extends AppCompatActivity {
             } else if (resultCode == 1002) {
                 Toast.makeText(this, "deleted", Toast.LENGTH_LONG).show();
             }
+            binding.getCalendarViewModel().setCalendarList();
+            calendarAdapter.notifyDataSetChanged();
+        }
+
+        if(resultCode == 2000) { //적용 안됨
+            Toast.makeText(this, "loading completed", Toast.LENGTH_LONG).show();
+            System.out.println("불러오기 완료");
             binding.getCalendarViewModel().setCalendarList();
             calendarAdapter.notifyDataSetChanged();
         }

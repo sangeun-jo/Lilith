@@ -1,36 +1,67 @@
 package sej.calendar.customcalendar;
 
+import android.content.Context;
+import android.content.res.Resources;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.IntStream;
 
 import io.realm.Realm;
 import sej.calendar.customcalendar.model.DayView;
 import sej.calendar.customcalendar.model.Memo;
+import sej.calendar.customcalendar.ui.GoogleCalendarActivity;
 import sej.calendar.customcalendar.ui.MainActivity;
+
+import static androidx.core.app.ActivityCompat.startActivityForResult;
 
 public class CalendarViewModel extends ViewModel {
     private CalendarConverter converter;
     private ArrayList<DayView> calList;
+    private ArrayList<Memo> eventList;
     private Realm realm;
     private int curYear;
     private int curMonth;
+
+    private GoogleAccountCredential credential;
+    private String savedAccount;
+    private String savedCalendar;
+    private GoogleCalendar googleTask;
 
     public MutableLiveData<String> calendarHeader = new MutableLiveData<>();
     public MutableLiveData<ArrayList<DayView>> calendarList = new MutableLiveData<>();
 
 
-    public CalendarViewModel() {
-        realm = Realm.getDefaultInstance();
-        converter = new CalendarConverter(MainActivity.dayPerMonth);
-        setToday();
+    public CalendarViewModel() { //뷰모델 초기화 시 값 넘겨주는 거 제대로 배우기!
     }
 
+    public void setBefore(
+            GoogleAccountCredential credential,
+            String savedAccount, String savedCalendar,
+            CalendarConverter converter) {
+        realm = Realm.getDefaultInstance();
+        this.credential = credential;
+        this.savedAccount = savedAccount;
+        this.savedCalendar = savedCalendar;
+        this.converter = converter;
+        credential.setSelectedAccountName(savedAccount);
+        googleTask = GoogleCalendar.build(credential);
+        setToday();
+    }
 
     public void nextMonth() {
         if(curMonth == converter.MONTH_PER_YEAR){
@@ -72,7 +103,6 @@ public class CalendarViewModel extends ViewModel {
 
     public void setCalendarList() {
         // 메모 불러오는 기능 어댑터에서 분리시키기
-
         //12월 기준으로 변환해서 데이터 불러오기(따로 함수로 만들기. 커스텀 달력 기준 년, 월 주면 12월 기준으로 변환하여
         // 구글 캘린더 api로 이벤트를 리스트로 얻어오기)
         // 불러온 메모 숫자셀에만 넣기
@@ -114,27 +144,25 @@ public class CalendarViewModel extends ViewModel {
     private void setNumberDate() {
         int dayOfMonth;
 
-        System.out.println("===========이제부터 " + curMonth + "월 데이터를 불러오겠습니다============");
         //마지막 달 아님
         if (curMonth != converter.MONTH_PER_YEAR) {
             dayOfMonth = converter.DAY_PER_MONTH;
         } else { // 마지막 달
             dayOfMonth = converter.LAST_MONTH_DAY;
         }
+
         Calendar start = converter.cToN(curYear + "-" + curMonth + "-" + 1);
         Calendar end = converter.cToN(curYear + "-" + curMonth + "-" + dayOfMonth);
 
         ArrayList<Memo> memoList  = getMemoList(start, end);
+
         for (int i = 0; i < dayOfMonth; i++) {
             DayView day = new DayView(false);
             day.setCustomDate(curYear, curMonth, i+1);
             String[] date = memoList.get(i).getDate().split("-");
             day.setNormalDate(date[1] +"/" + date[2], memoList.get(i));
-            System.out.println(memoList.get(i).getDate() + ":" + memoList.get(i).getContent());
             calList.add(day);
         }
-
-        System.out.println("===================메모 리스트 불러오기 끗===================");
     }
 
 
@@ -148,31 +176,58 @@ public class CalendarViewModel extends ViewModel {
         }
     }
 
-    //그리는 월의 메모 리스트 불러오기
-    private ArrayList<Memo> getMemoList(Calendar start, Calendar end) {
-        ArrayList<Memo> normalDateList = new ArrayList<>();
-        SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        //SimpleDateFormat md = new SimpleDateFormat("MM/dd", Locale.getDefault());
-        while (start.getTimeInMillis() <= end.getTimeInMillis()) {
-            // 커스텀 캘린더에서 메모 불러오기
-            String date = ymd.format(start.getTime());
-            Memo result = realm.where(Memo.class).equalTo("date", date).findFirst();
-            System.out.println(date  + "불러온 메모: " + result.getContent());
 
-            if (result == null) { //없으면 만들기
-                realm.beginTransaction();
-                Memo memo = realm.createObject(Memo.class);
-                memo.setDate(date);
-                normalDateList.add(memo);
-                realm.commitTransaction();
-            } else { // 있으면 기존 메모 넣기
-                normalDateList.add(result);
-            }
-            start.add(Calendar.DATE,1);
+
+    class CalendarEventThread extends Thread {
+        private Calendar start;
+        private Calendar end;
+        public CalendarEventThread(){
+            //this.start = start;
+            //this.end = end;
         }
-        return normalDateList;
+        @Override
+        public void run() {
+            try {
+                String calendarId = googleTask.getCalendarID(savedCalendar);
+                eventList = googleTask.getEventByDate(calendarId);
+                for(Memo m:eventList) {
+                    System.out.print(m.getDate());
+                    System.out.print(m.getTitle());
+                }
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            } catch (UserRecoverableAuthException e) {
+
+            }
+        }
     }
 
+    //그리는 월의 커스텀 캘린더 메모 리스트 불러오기
+    private ArrayList<Memo> getMemoList(Calendar start, Calendar end)  {
+        ArrayList<Memo> normalDateList = new ArrayList<>();
+        SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
+        System.out.println("선택된 달력: " + savedCalendar);
+        if(savedCalendar != null ){
+            //ayns 어쩌구 써보기
+            CalendarEventThread c = new CalendarEventThread();
+            c.start();
+        }
+            while (start.getTimeInMillis() <= end.getTimeInMillis()) {
+                // 커스텀 캘린더에서 메모 불러오기
+                String date = ymd.format(start.getTime());
+                Memo result = realm.where(Memo.class).equalTo("date", date).findFirst();
+                if (result == null) { //없으면 날짜만 넣기
+                    Memo memo = new Memo();
+                    memo.setDate(date);
+                    normalDateList.add(memo);
+                } else { // 있으면 기존 메모 넣기
+                    normalDateList.add(result);
+                }
+                start.add(Calendar.DATE,1);
+            }
 
 
+        return normalDateList;
+    }
+    // 지금 연동된 계정이 있다면, 연동된 계정의 이벤트 리스트 가져오기
 }

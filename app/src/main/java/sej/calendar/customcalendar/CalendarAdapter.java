@@ -26,7 +26,7 @@ public class CalendarAdapter extends BaseAdapter {
     private CalendarConverter converter;
 
     SimpleDateFormat md = new SimpleDateFormat("M/d", Locale.getDefault());
-    SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
 
     public CalendarAdapter(ArrayList<DayView> arrayListDayInfo, String selectedDate, CalendarConverter converter){ //생성자
         this.arrayListDayInfo = arrayListDayInfo;

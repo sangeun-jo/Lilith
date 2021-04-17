@@ -1,5 +1,6 @@
 package sej.calendar.customcalendar;
 
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,8 +38,9 @@ public class GoogleCalendar {
 
     private com.google.api.services.calendar.Calendar mService = null;
 
-    SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    SimpleDateFormat ymdhms = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSSX", Locale.getDefault());
+    SimpleDateFormat yMd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
+    SimpleDateFormat yMMdd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    SimpleDateFormat ymdhms = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSSXXX", Locale.getDefault());
 
     Realm realm;
 
@@ -55,9 +59,8 @@ public class GoogleCalendar {
         return new GoogleCalendar(mService);
     }
 
-    public String getCalendarID(String calendarTitle) throws IOException {
+    public String getCalendarID(String calendarTitle) throws IOException, UserRecoverableAuthException {
         String id = null;
-        // Iterate through entries in calendar list
         String pageToken = null;
         do {
             CalendarList calendarList = null;
@@ -74,32 +77,110 @@ public class GoogleCalendar {
         return id;
     }
 
-    public void getEvent(String calendarId) throws IOException, ParseException {
-        realm = Realm.getDefaultInstance();
+    public ArrayList<Memo> getEventByDate(String calendarId)  throws IOException, ParseException{
+        ArrayList<Memo> eventList = new ArrayList<>();
         String pageToken = null;
-
         do {
-            Events events = mService.events().list(calendarId).setPageToken(pageToken).execute();
+            Events events = mService.events()
+                    .list(calendarId)
+                    .setPageToken(pageToken)
+                    //.setTimeMin()
+                    //.setTimeMax()
+                    .execute();
             List<Event> items = events.getItems();
             for (Event event : items) {
-                //realm.beginTransaction();
-                Memo memo = realm.createObject(Memo.class);
-                Date datetime = ymdhms.parse(event.getCreated().toString());
-                memo.setDate(ymd.format(datetime.getTime()));
+                String date;
+                if(event.getStart().getDate() != null) {
+                    date = yMd.format(yMMdd.parse(event.getStart().getDate().toString()).getTime());
+                } else {
+                    date = yMd.format(ymdhms.parse(event.getStart().getDateTime().toString()).getTime());
+                }
+                Memo memo = new Memo();
+                memo.setDate(date);
                 memo.setTitle(event.getSummary());
                 memo.setContent(event.getDescription());
-                //realm.commitTransaction();
+                eventList.add(memo);
+            }
+            pageToken = events.getNextPageToken();
+        } while (pageToken != null);
+
+        return eventList;
+    }
+
+    /*
+    //이벤트 리스트 가져오기
+    public void getEventByDate(String calendarId)  throws IOException, ParseException{
+        realm = Realm.getDefaultInstance();
+        String pageToken = null;
+        do {
+            Events events = mService.events()
+                    .list(calendarId)
+                    .setPageToken(pageToken)
+                    //.setTimeMin()
+                    //.setTimeMax()
+                    .execute();
+            List<Event> items = events.getItems();
+            for (Event event : items) {
+                String date;
+                if(event.getStart().getDate() != null) {
+                    date = yMd.format(yMMdd.parse(event.getStart().getDate().toString()).getTime());
+                } else {
+                    date = yMd.format(ymdhms.parse(event.getStart().getDateTime().toString()).getTime());
+                }
+                realm.beginTransaction();
+                Memo memo = realm.createObject(Memo.class);
+                memo.setDate(date);
+                memo.setTitle(event.getSummary());
+                memo.setContent(event.getDescription());
+                realm.commitTransaction();
             }
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
     }
 
+     */
+
+    //이벤트 리스트 가져오기
+    public ArrayList<Memo> getEventByDate(String calendarId, java.util.Calendar start, java.util.Calendar end)  throws IOException, ParseException{
+        ArrayList<Memo> memoList = new ArrayList<>();
+
+        String pageToken = null;
+        do {
+            Events events = mService.events()
+                    .list(calendarId)
+                    .setPageToken(pageToken)
+                    .setTimeMin(DateTime.parseRfc3339(start.getTime().toString()))
+                    .setTimeMax(DateTime.parseRfc3339(end.getTime().toString()))
+                    .execute();
+            System.out.println("시자날짜 : " + DateTime.parseRfc3339(start.getTime().toString()));
+            System.out.println("끝 날짜 : " + DateTime.parseRfc3339(end.getTime().toString()));
+            List<Event> items = events.getItems();
+
+            for (Event event : items) {
+                String date;
+                if(event.getStart().getDate() != null) {
+                    date = yMd.format(yMMdd.parse(event.getStart().getDate().toString()).getTime());
+                } else {
+                    date = yMd.format(ymdhms.parse(event.getStart().getDateTime().toString()).getTime());
+                }
+                Memo memo = new Memo();
+                memo.setDate(date);
+                memo.setTitle(event.getSummary());
+                memo.setContent(event.getDescription());
+                memoList.add(memo);
+            }
+            pageToken = events.getNextPageToken();
+        } while (pageToken != null);
+
+        return memoList;
+    }
+
+
     public List<String> getCalendarList() throws IOException, UserRecoverableAuthIOException{
         List<String> result = new ArrayList<>();
         String pageToken = null;
         do {
-            CalendarList calendarList = null;
-            calendarList = mService.calendarList().list().setPageToken(pageToken).execute();
+            CalendarList calendarList = mService.calendarList().list().setPageToken(pageToken).execute();
             List<CalendarListEntry> items = calendarList.getItems();
             for(int i =0; i < items.size(); i++) {
                 result.add(items.get(i).getSummary()) ;
@@ -110,7 +191,7 @@ public class GoogleCalendar {
     }
 
 
-    private String createCalendar() throws IOException {
+    private String createCalendar() throws IOException, UserRecoverableAuthException {
         String ids = getCalendarID("Custom Calendar");
         if ( ids != null ){
             return "Calendar already exist";
