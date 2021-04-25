@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.util.DateTime;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -107,14 +108,11 @@ public class CalendarViewModel extends ViewModel {
         // 구글 캘린더 api로 이벤트를 리스트로 얻어오기)
         // 불러온 메모 숫자셀에만 넣기
         calendarHeader.setValue(curYear + "." +curMonth);
-
         calList = new ArrayList<>();
         calList.clear();
-
         setFrontEmptyDate();
         setNumberDate();
         setBackEmptyDate();
-
         calendarList.setValue(calList);
     }
 
@@ -143,16 +141,15 @@ public class CalendarViewModel extends ViewModel {
     // 숫자 쉘 채우기
     private void setNumberDate() {
         int dayOfMonth;
-
         //마지막 달 아님
         if (curMonth != converter.MONTH_PER_YEAR) {
             dayOfMonth = converter.DAY_PER_MONTH;
         } else { // 마지막 달
             dayOfMonth = converter.LAST_MONTH_DAY;
         }
-
-        Calendar start = converter.cToN(curYear + "-" + curMonth + "-" + 1);
-        Calendar end = converter.cToN(curYear + "-" + curMonth + "-" + dayOfMonth);
+        
+        Calendar start = converter.cToN(curYear, curMonth, 1);
+        Calendar end = converter.cToN(curYear, curMonth, dayOfMonth);
 
         ArrayList<Memo> memoList  = getMemoList(start, end);
 
@@ -176,40 +173,100 @@ public class CalendarViewModel extends ViewModel {
         }
     }
 
+    
+    class getCalList extends Thread {
+        @Override
+        public void run() {
+            calendarHeader.setValue(curYear + "." +curMonth);
+            calList = new ArrayList<>();
+            calList.clear();
+            setFrontEmptyDate();
+
+
+            int dayOfMonth;
+            //마지막 달 아님
+            if (curMonth != converter.MONTH_PER_YEAR) {
+                dayOfMonth = converter.DAY_PER_MONTH;
+            } else { // 마지막 달
+                dayOfMonth = converter.LAST_MONTH_DAY;
+            }
+
+            Calendar start = converter.cToN(curYear, curMonth, 1);
+            Calendar end = converter.cToN(curYear, curMonth, dayOfMonth);
+
+            ArrayList<Memo> normalDateList = new ArrayList<>();
+            SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
+            if(savedCalendar != null ){
+                CalendarEventThread c = new CalendarEventThread();
+                c.setCal(new DateTime(start.getTime()), new DateTime(end.getTime()));
+                c.start();
+            }
+            while (start.getTimeInMillis() <= end.getTimeInMillis()) {
+                // 커스텀 캘린더에서 메모 불러오기
+                String date = ymd.format(start.getTime());
+                Memo result = realm.where(Memo.class).equalTo("date", date).findFirst();
+                if (result == null) { //없으면 날짜만 넣기
+                    Memo memo = new Memo();
+                    memo.setDate(date);
+                    normalDateList.add(memo);
+                } else { // 있으면 기존 메모 넣기
+                    normalDateList.add(result);
+                }
+                start.add(Calendar.DATE,1);
+            }
+
+
+
+            for (int i = 0; i < dayOfMonth; i++) {
+                DayView day = new DayView(false);
+                day.setCustomDate(curYear, curMonth, i+1);
+                String[] date = memoList.get(i).getDate().split("-");
+                day.setNormalDate(date[1] +"/" + date[2], memoList.get(i));
+                calList.add(day);
+            }
+
+
+            setBackEmptyDate();
+            calendarList.setValue(calList);
+        }
+    }
 
 
     class CalendarEventThread extends Thread {
-        private Calendar start;
-        private Calendar end;
-        public CalendarEventThread(){
-            //this.start = start;
-            //this.end = end;
+        private DateTime start;
+        private DateTime end;
+
+        public void setCal(DateTime start, DateTime end){
+            this.start = start;
+            this.end = end;
         }
         @Override
         public void run() {
             try {
                 String calendarId = googleTask.getCalendarID(savedCalendar);
-                eventList = googleTask.getEventByDate(calendarId);
-                for(Memo m:eventList) {
+                eventList = googleTask.getEventByDate(calendarId, start, end);
+                for(Memo m: eventList){
                     System.out.print(m.getDate());
-                    System.out.print(m.getTitle());
+                    System.out.println(m.getTitle());
                 }
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
             } catch (UserRecoverableAuthException e) {
 
             }
+
         }
     }
+
+
 
     //그리는 월의 커스텀 캘린더 메모 리스트 불러오기
     private ArrayList<Memo> getMemoList(Calendar start, Calendar end)  {
         ArrayList<Memo> normalDateList = new ArrayList<>();
         SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
-        System.out.println("선택된 달력: " + savedCalendar);
         if(savedCalendar != null ){
-            //ayns 어쩌구 써보기
             CalendarEventThread c = new CalendarEventThread();
+            c.setCal(new DateTime(start.getTime()), new DateTime(end.getTime()));
             c.start();
         }
             while (start.getTimeInMillis() <= end.getTimeInMillis()) {
@@ -225,7 +282,6 @@ public class CalendarViewModel extends ViewModel {
                 }
                 start.add(Calendar.DATE,1);
             }
-
 
         return normalDateList;
     }

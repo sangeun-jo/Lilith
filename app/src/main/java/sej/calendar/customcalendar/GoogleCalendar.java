@@ -12,7 +12,6 @@ import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
@@ -107,55 +106,22 @@ public class GoogleCalendar {
         return eventList;
     }
 
-    /*
-    //이벤트 리스트 가져오기
-    public void getEventByDate(String calendarId)  throws IOException, ParseException{
-        realm = Realm.getDefaultInstance();
-        String pageToken = null;
-        do {
-            Events events = mService.events()
-                    .list(calendarId)
-                    .setPageToken(pageToken)
-                    //.setTimeMin()
-                    //.setTimeMax()
-                    .execute();
-            List<Event> items = events.getItems();
-            for (Event event : items) {
-                String date;
-                if(event.getStart().getDate() != null) {
-                    date = yMd.format(yMMdd.parse(event.getStart().getDate().toString()).getTime());
-                } else {
-                    date = yMd.format(ymdhms.parse(event.getStart().getDateTime().toString()).getTime());
-                }
-                realm.beginTransaction();
-                Memo memo = realm.createObject(Memo.class);
-                memo.setDate(date);
-                memo.setTitle(event.getSummary());
-                memo.setContent(event.getDescription());
-                realm.commitTransaction();
-            }
-            pageToken = events.getNextPageToken();
-        } while (pageToken != null);
-    }
-
-     */
 
     //이벤트 리스트 가져오기
-    public ArrayList<Memo> getEventByDate(String calendarId, java.util.Calendar start, java.util.Calendar end)  throws IOException, ParseException{
+    public ArrayList<Memo> getEventByDate(String calendarId, DateTime start, DateTime end)  throws IOException, ParseException{
         ArrayList<Memo> memoList = new ArrayList<>();
 
+        System.out.println("달력시작" + start);
+        System.out.println("달력끗" + end);
         String pageToken = null;
         do {
             Events events = mService.events()
                     .list(calendarId)
                     .setPageToken(pageToken)
-                    .setTimeMin(DateTime.parseRfc3339(start.getTime().toString()))
-                    .setTimeMax(DateTime.parseRfc3339(end.getTime().toString()))
+                    .setTimeMin(start)
+                    .setTimeMax(end)
                     .execute();
-            System.out.println("시자날짜 : " + DateTime.parseRfc3339(start.getTime().toString()));
-            System.out.println("끝 날짜 : " + DateTime.parseRfc3339(end.getTime().toString()));
             List<Event> items = events.getItems();
-
             for (Event event : items) {
                 String date;
                 if(event.getStart().getDate() != null) {
@@ -165,13 +131,14 @@ public class GoogleCalendar {
                 }
                 Memo memo = new Memo();
                 memo.setDate(date);
+                //System.out.println(date);
                 memo.setTitle(event.getSummary());
+                //System.out.println(event.getSummary());
                 memo.setContent(event.getDescription());
                 memoList.add(memo);
             }
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
-
         return memoList;
     }
 
