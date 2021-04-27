@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -108,11 +109,8 @@ public class GoogleCalendar {
 
 
     //이벤트 리스트 가져오기
-    public ArrayList<Memo> getEventByDate(String calendarId, DateTime start, DateTime end)  throws IOException, ParseException{
-        ArrayList<Memo> memoList = new ArrayList<>();
-
-        System.out.println("달력시작" + start);
-        System.out.println("달력끗" + end);
+    public HashMap<String,Memo> getEventByDate(String calendarId, DateTime start, DateTime end)  throws IOException, ParseException{
+        HashMap<String, Memo> memoList = new HashMap<>();
         String pageToken = null;
         do {
             Events events = mService.events()
@@ -120,22 +118,35 @@ public class GoogleCalendar {
                     .setPageToken(pageToken)
                     .setTimeMin(start)
                     .setTimeMax(end)
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
                     .execute();
             List<Event> items = events.getItems();
+
+
             for (Event event : items) {
                 String date;
-                if(event.getStart().getDate() != null) {
-                    date = yMd.format(yMMdd.parse(event.getStart().getDate().toString()).getTime());
+
+                //일단 당일 데이터만...
+                Date startDate;
+                Date endDate;
+
+                if (event.getStart().getDateTime() != null) {
+                    startDate = yMMdd.parse(event.getStart().getDateTime().toString());
+                    endDate = yMMdd.parse(event.getEnd().getDateTime().toString());
                 } else {
-                    date = yMd.format(ymdhms.parse(event.getStart().getDateTime().toString()).getTime());
+                    startDate = yMMdd.parse(event.getStart().getDate().toString());
+                    endDate = yMMdd.parse(event.getStart().getDate().toString());
                 }
-                Memo memo = new Memo();
-                memo.setDate(date);
-                //System.out.println(date);
-                memo.setTitle(event.getSummary());
-                //System.out.println(event.getSummary());
-                memo.setContent(event.getDescription());
-                memoList.add(memo);
+
+                if(startDate.equals(endDate)) { //시작시간 == 종료시간
+                    date = yMd.format(startDate.getTime());
+                    Memo memo = new Memo();
+                    memo.setDate(date);
+                    memo.setTitle(event.getSummary());
+                    memo.setContent(event.getDescription());
+                    memoList.put(date, memo);
+                }
             }
             pageToken = events.getNextPageToken();
         } while (pageToken != null);

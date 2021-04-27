@@ -51,6 +51,8 @@ public class MemoActivity extends AppCompatActivity{
         Intent intent = getIntent();
         date12 = intent.getStringExtra("date12");
         String customDate = intent.getStringExtra("customDate");
+        String gTitle = intent.getStringExtra("title");
+        String gContent = intent.getStringExtra("content");
 
         editMemo = findViewById(R.id.edit_memo);
         memoTitle = findViewById(R.id.memo_title);
@@ -66,12 +68,13 @@ public class MemoActivity extends AppCompatActivity{
 
         exitMemo = realm.where(Memo.class).equalTo("date", date12).findFirst();
 
-
         if (exitMemo != null) {
             editMemo.setText(exitMemo.getContent());
             memoTitle.setText(exitMemo.getTitle());
         }
 
+        memoTitle.setText(gTitle);
+        editMemo.setText(gContent);
 
         saveBtn.setOnClickListener(v -> {
             editMemo(date12);
@@ -132,8 +135,6 @@ public class MemoActivity extends AppCompatActivity{
         super.onDestroy();
         realm.close();
     }
-
-
 
 
 }

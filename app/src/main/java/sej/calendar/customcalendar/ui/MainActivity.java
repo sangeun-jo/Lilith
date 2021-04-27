@@ -4,6 +4,7 @@ package sej.calendar.customcalendar.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -103,16 +105,34 @@ public class MainActivity extends GoogleCalendarActivity {
         binding.gvCalendar.setOnItemClickListener((adapterView, view, i, l) -> {
             DayView clickedDay = (DayView)view.getTag();
             String customDate = clickedDay.getCustomYMD();
+
             if(!clickedDay.isEmpty){
-                if(customDate.equals(calendarAdapter.getSelectedDate())) {
+                if(customDate.equals(calendarAdapter.getSelectedDate()))
+                {
+                    String date12 = clickedDay.getMemo().getDate();
+
+                    String title = null;
+                    String content = null;
+
                     Intent intent = new Intent(getApplicationContext(), MemoActivity.class);
                     intent.putExtra("customDate", customDate);
-                    intent.putExtra("date12", ymd.format(converter.cToN(customDate).getTime()));
+                    intent.putExtra("date12", date12);
+
+                    HashMap<String, Memo> eventList = binding.getCalendarViewModel().getEventList();
+                    if (eventList.get(date12) != null) {
+                        title = eventList.get(date12).getTitle();
+                        content = eventList.get(date12).getContent();
+                    }
+                    intent.putExtra("title", title);
+                    intent.putExtra("content", content);
+
                     startActivityForResult(intent, 1000);
                 }
                 calendarAdapter.setSelectedDate(customDate);
                 calendarAdapter.notifyDataSetChanged();
             }
+
+
         });
         
         observe();
