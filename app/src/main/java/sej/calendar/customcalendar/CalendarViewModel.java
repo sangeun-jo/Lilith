@@ -179,8 +179,6 @@ public class CalendarViewModel extends ViewModel {
 
             }
 
-            System.out.println("이벤트 리스트 불러옴!!! " + eventList.size());
-
             while (start.getTimeInMillis() <= end.getTimeInMillis()) {
                 realm = Realm.getDefaultInstance();
                 // 커스텀 캘린더에서 메모 불러오기
@@ -191,19 +189,17 @@ public class CalendarViewModel extends ViewModel {
                 // 이벤트 있으면 추가
                 if (eventList.size() > 0) {
                     if (eventList.get(date) != null) {
-                        System.out.println(eventList.get(date).getTitle() + "/" + date);
-                        System.out.println("이벤트 있음!!! ");
-                        System.out.print(eventList.get(date).getTitle());
-                        System.out.print(eventList.get(date).getContent());
                         memo.setTitle(eventList.get(date).getTitle());
                     }
                 }
+
                 //리얼님 있으면 추가
                 Memo result = realm.where(Memo.class).equalTo("date", date).findFirst();
                 if (result != null) { // 리얼님 메모 있으면 추가
                     memo.setTitle("혼합됨!!!");
-                    memo.setContent(result.getContent()  + "\n" + eventList.get(date).getContent());
+                    memo.setContent(eventList.get(date).getContent());
                 }
+
                 normalDateList.add(memo);
                 start.add(Calendar.DATE,1);
             }

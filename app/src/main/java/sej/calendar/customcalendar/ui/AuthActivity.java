@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 import sej.calendar.customcalendar.GoogleCalendar;
 import sej.calendar.customcalendar.R;
 import sej.calendar.customcalendar.model.Memo;
@@ -141,6 +142,8 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
                     Toast.makeText(this, calList[which] + " selected", Toast.LENGTH_LONG).show();
                     //CalendarEventThread calendarEventThread = new CalendarEventThread(googleCalendar.getText().toString());
                     //calendarEventThread.start();
+                    SaveRealmToGoogleCal saveRealmToGoogleCal = new SaveRealmToGoogleCal();
+                    saveRealmToGoogleCal.start();
                 })
                 .setCancelable(false)
                 .show();
@@ -153,7 +156,28 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
 
 
-    //이벤트 가져오는 핸들러
+    //리얼님 데이터 전부 가져와서 구글 계정에 추가하기
+    class SaveRealmToGoogleCal extends Thread {
+        @Override
+        public void run() {
+            RealmResults<Memo> realMemo = realm.where(Memo.class).findAll();
+            ArrayList<Memo> memoList = new ArrayList<>();
+            for (Memo m: realMemo) {
+                memoList.add(m);
+            }
+            String calendarId = null;
+            try {
+                calendarId = googleTask.getCalendarID(savedCalendar);
+                googleTask.createEvents(memoList, calendarId);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (UserRecoverableAuthException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /*
     class CalendarEventThread extends Thread {
         private String calTitle;
         public CalendarEventThread(String calTitle) {
@@ -173,6 +197,8 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
         }
     }
+
+     */
 
 
 

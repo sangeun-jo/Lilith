@@ -12,6 +12,7 @@ import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import java.io.IOException;
@@ -166,6 +167,49 @@ public class GoogleCalendar {
             pageToken = calendarList.getNextPageToken();
         } while (pageToken != null);
         return result;
+    }
+
+    public void createEvents(ArrayList<Memo> savedMemo, String calendarId) {
+
+        for (Memo m: savedMemo) {
+            Event event = new Event()
+                    .setSummary(m.getTitle())
+                    .setDescription(m.getContent());
+
+            DateTime startDateTime = new DateTime(m.getDate());
+            EventDateTime start = new EventDateTime()
+                    .setDate(startDateTime);
+            event.setStart(start);
+            event.setEnd(start);
+
+            /*리마인더 설정부분
+            String[] recurrence = new String[] {"RRULE:FREQ=DAILY;COUNT=2"};
+            event.setRecurrence(Arrays.asList(recurrence));
+
+            EventAttendee[] attendees = new EventAttendee[] {
+                    new EventAttendee().setEmail("lpage@example.com"),
+                    new EventAttendee().setEmail("sbrin@example.com"),
+            };
+            event.setAttendees(Arrays.asList(attendees));
+
+            EventReminder[] reminderOverrides = new EventReminder[] {
+                    new EventReminder().setMethod("email").setMinutes(24 * 60),
+                    new EventReminder().setMethod("popup").setMinutes(10),
+            };
+            Event.Reminders reminders = new Event.Reminders()
+                    .setUseDefault(false)
+                    .setOverrides(Arrays.asList(reminderOverrides));
+            event.setReminders(reminders);
+
+             */
+
+            try {
+                event = mService.events().insert(calendarId, event).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.printf("Event created: %s\n", event.getHtmlLink());
+        }
     }
 
 

@@ -112,8 +112,13 @@ public class MemoActivity extends AppCompatActivity{
 
         Memo memo;
 
+        //구글 계정 연동이 되어있는 경우
+
+        //구글 계정 연동이 안 되어있는 경우 (일단 이거먼저 해결하자 )
+
         realm.beginTransaction();
-        if (exitMemo == null) { // 메모 없었던 경우 저장
+
+        if (exitMemo == null) { // 기존 메모 없었던 경우 저장
             memo = realm.createObject(Memo.class);
             memo.setDate(date12);
             memo.setTitle(title);
