@@ -46,6 +46,8 @@ public class MemoActivity extends AppCompatActivity{
                 this, Collections.singleton(CalendarScopes.CALENDAR))
                 .setBackOff(new ExponentialBackOff());
 
+
+
         System.out.println(mCredential.getSelectedAccountName() + " 계정으로 로그인 됨");
 
         Intent intent = getIntent();
@@ -81,7 +83,6 @@ public class MemoActivity extends AppCompatActivity{
             setResult(1001);
             finish();
         });
-
 
         deleteBtn.setOnClickListener(v -> {
             realm.beginTransaction();

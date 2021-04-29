@@ -54,8 +54,7 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
 
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
     void chooseAccount() {
-        if (EasyPermissions.hasPermissions(
-                this, Manifest.permission.GET_ACCOUNTS)) {
+        if (EasyPermissions.hasPermissions(this, Manifest.permission.GET_ACCOUNTS)) {
             startActivityForResult(mCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
         } else {
             // Request the GET_ACCOUNTS permission via a user dialog
@@ -64,7 +63,9 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
                     "This app needs to access your Google account (via Contacts).",
                     REQUEST_PERMISSION_GET_ACCOUNTS,
                     Manifest.permission.GET_ACCOUNTS);
+            startActivityForResult(mCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
         }
+
     }
 
     @Override

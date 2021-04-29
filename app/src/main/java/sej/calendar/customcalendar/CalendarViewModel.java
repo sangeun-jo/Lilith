@@ -164,7 +164,7 @@ public class CalendarViewModel extends ViewModel {
             ArrayList<Memo> normalDateList = new ArrayList<>();
             SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
 
-            if(savedCalendar != null ){
+            if(savedCalendar != null) { //구글 연동을 안한 경우
                 String calendarId = null;
                 try {
                     calendarId = googleTask.getCalendarID(savedCalendar);
@@ -177,33 +177,38 @@ public class CalendarViewModel extends ViewModel {
                     e.printStackTrace();
                 }
 
-            }
+                while (start.getTimeInMillis() <= end.getTimeInMillis()) {
+                    String date = ymd.format(start.getTime());
+                    Memo memo = new Memo();
+                    memo.setDate(date);
 
-            while (start.getTimeInMillis() <= end.getTimeInMillis()) {
-                realm = Realm.getDefaultInstance();
-                // 커스텀 캘린더에서 메모 불러오기
-                String date = ymd.format(start.getTime());
-                Memo memo = new Memo();
-                memo.setDate(date);
-
-                // 이벤트 있으면 추가
-                if (eventList.size() > 0) {
-                    if (eventList.get(date) != null) {
-                        memo.setTitle(eventList.get(date).getTitle());
+                    // 이벤트 있으면 추가
+                    if (eventList.size() > 0) {
+                        if (eventList.get(date) != null) {
+                            memo.setTitle(eventList.get(date).getTitle());
+                        }
                     }
+                    normalDateList.add(memo);
+                    start.add(Calendar.DATE,1);
                 }
 
-                //리얼님 있으면 추가
-                Memo result = realm.where(Memo.class).equalTo("date", date).findFirst();
-                if (result != null) { // 리얼님 메모 있으면 추가
-                    memo.setTitle("혼합됨!!!");
-                    memo.setContent(eventList.get(date).getContent());
-                }
 
-                normalDateList.add(memo);
-                start.add(Calendar.DATE,1);
+            } else { //구글 연동을 한 경우
+                while (start.getTimeInMillis() <= end.getTimeInMillis()) {
+                    String date = ymd.format(start.getTime());
+                    Memo memo = new Memo();
+                    memo.setDate(date);
+                    //리얼님 있으면 추가
+                    realm = Realm.getDefaultInstance();
+                    Memo result = realm.where(Memo.class).equalTo("date", date).findFirst();
+                    if (result != null) { // 리얼님 메모 있으면 추가
+                        memo.setTitle(result.getTitle());
+                        memo.setContent(result.getContent());
+                    }
+                    normalDateList.add(memo);
+                    start.add(Calendar.DATE,1);
+                }
             }
-
 
             for (int i = 0; i < dayOfMonth; i++) {
                 DayView day = new DayView(false);

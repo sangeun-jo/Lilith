@@ -134,10 +134,10 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
 
         oDialog.setTitle("Choose calendar")
                 .setItems(calList, (dialog, which) -> {
-                    SharedPreferences settings = getSharedPreferences("pref", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString("savedCalendar", calList[which]);
-                    editor.apply();
+                    //SharedPreferences settings = getSharedPreferences("pref", MODE_PRIVATE);
+                    //SharedPreferences.Editor editor = settings.edit();
+                    //editor.putString("savedCalendar", calList[which]);
+                    //editor.apply();
                     googleCalendar.setText(calList[which]);
                     Toast.makeText(this, calList[which] + " selected", Toast.LENGTH_LONG).show();
                     //CalendarEventThread calendarEventThread = new CalendarEventThread(googleCalendar.getText().toString());
@@ -168,6 +168,10 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
             String calendarId = null;
             try {
                 calendarId = googleTask.getCalendarID(savedCalendar);
+                SharedPreferences settings = getSharedPreferences("pref", MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("savedCalendar", calendarId);
+                editor.apply();
                 googleTask.createEvents(memoList, calendarId);
             } catch (IOException e) {
                 e.printStackTrace();
