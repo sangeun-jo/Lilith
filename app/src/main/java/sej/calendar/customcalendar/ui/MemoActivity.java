@@ -2,26 +2,38 @@ package sej.calendar.customcalendar.ui;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
+import java.time.LocalTime;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import sej.calendar.customcalendar.CalendarConverter;
+import sej.calendar.customcalendar.CalendarViewModel;
 import sej.calendar.customcalendar.GoogleCalendar;
 import sej.calendar.customcalendar.R;
 import sej.calendar.customcalendar.model.Memo;
 
-public class MemoActivity extends AppCompatActivity{
+public class MemoActivity extends GoogleCalendarActivity {
 
     private Realm realm;
 
@@ -36,6 +48,7 @@ public class MemoActivity extends AppCompatActivity{
 
     private GoogleAccountCredential mCredential;
 
+    private boolean isSysn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +60,16 @@ public class MemoActivity extends AppCompatActivity{
                 .setBackOff(new ExponentialBackOff());
 
 
+        SharedPreferences sf = getSharedPreferences("pref", MODE_PRIVATE);
 
-        System.out.println(mCredential.getSelectedAccountName() + " 계정으로 로그인 됨");
+        String savedAccount = sf.getString("savedAccount", null);
+        String savedCalendar = sf.getString("savedCalendar", null);
+
+        if(savedAccount != null && savedCalendar != null) {
+            System.out.println("구글 계정 연동됨!");
+            System.out.println(savedAccount + " 계정으로 로그인 됨");
+            isSysn = true;
+        }
 
         Intent intent = getIntent();
         date12 = intent.getStringExtra("date12");
@@ -94,6 +115,25 @@ public class MemoActivity extends AppCompatActivity{
         });
     }
 
+    /*
+    private void addEvent() {
+        Event event = new Event();
+        event.setSummary(gTitle);
+        event.setDescription(gContent);
+
+        Date startDate = new Date();
+        Date endDate = new Date(startDate.getTime() + 3600000);
+
+        DateTime start = new DateTime(startDate, TimeZone.getDefault());
+        event.setStart(new EventDateTime().setDateTime(start));
+
+        DateTime end = new DateTime(endDate, TimeZone.getDefault());
+        event.setEnd(new EventDateTime().setDateTime(end));
+
+        mService.events().insert(calendarId, event).execute();
+    }
+
+     */
 
     //백 화살표 눌렸을 때 닫힘
     @Override
@@ -112,9 +152,8 @@ public class MemoActivity extends AppCompatActivity{
         String content = (editMemo.getText().length() > 0 ) ? editMemo.getText().toString():"no content";
 
         Memo memo;
-
         //구글 계정 연동이 되어있는 경우
-
+        
         //구글 계정 연동이 안 되어있는 경우 (일단 이거먼저 해결하자 )
 
         realm.beginTransaction();
