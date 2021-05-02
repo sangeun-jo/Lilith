@@ -91,6 +91,7 @@ public class MainActivity extends GoogleCalendarActivity {
 
         String savedAccount = sf.getString("savedAccount", null);
         savedCalendar = sf.getString("savedCalendar", null);
+
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
                 this, Collections.singleton(CalendarScopes.CALENDAR))
                 .setBackOff(new ExponentialBackOff());

@@ -63,7 +63,6 @@ public class GoogleCalendarActivity extends AppCompatActivity implements EasyPer
                     "This app needs to access your Google account (via Contacts).",
                     REQUEST_PERMISSION_GET_ACCOUNTS,
                     Manifest.permission.GET_ACCOUNTS);
-            startActivityForResult(mCredential.newChooseAccountIntent(), REQUEST_ACCOUNT_PICKER);
         }
 
     }

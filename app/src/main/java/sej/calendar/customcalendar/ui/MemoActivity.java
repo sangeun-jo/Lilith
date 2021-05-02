@@ -11,13 +11,18 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Collections;
@@ -43,10 +48,15 @@ public class MemoActivity extends GoogleCalendarActivity {
     private Button deleteBtn;
 
     private String date12; //12월
+    String gTitle;
+    String gContent;
 
     private Memo exitMemo;
 
+    String savedCalendar;
+
     private GoogleAccountCredential mCredential;
+    com.google.api.services.calendar.Calendar mService;
 
     private boolean isSysn = false;
 
@@ -59,11 +69,17 @@ public class MemoActivity extends GoogleCalendarActivity {
                 this, Collections.singleton(CalendarScopes.CALENDAR))
                 .setBackOff(new ExponentialBackOff());
 
+        HttpTransport transport = AndroidHttp.newCompatibleTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+        com.google.api.services.calendar.Calendar mService = new com.google.api.services.calendar.Calendar.Builder(
+                transport, jsonFactory, mCredential)
+                .setApplicationName("Google Calendar API Android Quickstart")
+                .build();
 
         SharedPreferences sf = getSharedPreferences("pref", MODE_PRIVATE);
 
         String savedAccount = sf.getString("savedAccount", null);
-        String savedCalendar = sf.getString("savedCalendar", null);
+        savedCalendar = sf.getString("savedCalendar", null);
 
         if(savedAccount != null && savedCalendar != null) {
             System.out.println("구글 계정 연동됨!");
@@ -74,8 +90,8 @@ public class MemoActivity extends GoogleCalendarActivity {
         Intent intent = getIntent();
         date12 = intent.getStringExtra("date12");
         String customDate = intent.getStringExtra("customDate");
-        String gTitle = intent.getStringExtra("title");
-        String gContent = intent.getStringExtra("content");
+        gTitle = intent.getStringExtra("title");
+        gContent = intent.getStringExtra("content");
 
         editMemo = findViewById(R.id.edit_memo);
         memoTitle = findViewById(R.id.memo_title);
@@ -152,22 +168,43 @@ public class MemoActivity extends GoogleCalendarActivity {
         String content = (editMemo.getText().length() > 0 ) ? editMemo.getText().toString():"no content";
 
         Memo memo;
-        //구글 계정 연동이 되어있는 경우
-        
-        //구글 계정 연동이 안 되어있는 경우 (일단 이거먼저 해결하자 )
 
-        realm.beginTransaction();
+        if(isSysn) {//구글 계정 연동이 안 되어있는 경우 (일단 이거먼저 해결하자 )
+            System.out.println("구글 연동 안되어있음");
+            realm.beginTransaction();
+            if (exitMemo == null) { // 기존 메모 없었던 경우 저장
+                memo = realm.createObject(Memo.class);
+                memo.setDate(date12);
+                memo.setTitle(title);
+                memo.setContent(content);
+            } else{ //메모가 원래 있었던 경우 입력된 값으로 새로 저장
+                exitMemo.setTitle(title);
+                exitMemo.setContent(content);
+            }
+            realm.commitTransaction();
+        } else { //구글 계정 연동이 되어있는 경우
+            System.out.println("구글연동 되어있음");
+            Event event = new Event();
+            event.setSummary(gTitle);
+            event.setDescription(gContent);
 
-        if (exitMemo == null) { // 기존 메모 없었던 경우 저장
-            memo = realm.createObject(Memo.class);
-            memo.setDate(date12);
-            memo.setTitle(title);
-            memo.setContent(content);
-        } else{ //메모가 원래 있었던 경우 입력된 값으로 새로 저장
-            exitMemo.setTitle(title);
-            exitMemo.setContent(content);
+            Date startDate = new Date();
+            Date endDate = new Date(startDate.getTime() + 3600000);
+
+            DateTime start = new DateTime(startDate, TimeZone.getDefault());
+            event.setStart(new EventDateTime().setDateTime(start));
+
+            DateTime end = new DateTime(endDate, TimeZone.getDefault());
+            event.setEnd(new EventDateTime().setDateTime(end));
+            try {
+                mService.events().insert(savedCalendar, event).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
-        realm.commitTransaction();
+
+
     }
 
 
