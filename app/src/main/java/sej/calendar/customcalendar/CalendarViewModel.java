@@ -167,11 +167,9 @@ public class CalendarViewModel extends ViewModel {
             if(savedCalendar != null) { //구글 연동을 안한 경우
                 String calendarId = null;
                 try {
-                    calendarId = googleTask.getCalendarID(savedCalendar);
-                    eventList = googleTask.getEventByDate(calendarId, new DateTime(start.getTime()), new DateTime(end.getTime()));
+                    //calendarId = googleTask.getCalendarID(savedCalendar);
+                    eventList = googleTask.getEventByDate(savedCalendar, new DateTime(start.getTime()), new DateTime(end.getTime()));
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (UserRecoverableAuthException e) {
                     e.printStackTrace();
                 } catch (ParseException e) {
                     e.printStackTrace();

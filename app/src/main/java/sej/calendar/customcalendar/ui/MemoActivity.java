@@ -71,7 +71,7 @@ public class MemoActivity extends GoogleCalendarActivity {
 
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        com.google.api.services.calendar.Calendar mService = new com.google.api.services.calendar.Calendar.Builder(
+        mService = new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, mCredential)
                 .setApplicationName("Google Calendar API Android Quickstart")
                 .build();
@@ -196,12 +196,12 @@ public class MemoActivity extends GoogleCalendarActivity {
 
             DateTime end = new DateTime(endDate, TimeZone.getDefault());
             event.setEnd(new EventDateTime().setDateTime(end));
+
             try {
                 mService.events().insert(savedCalendar, event).execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
 
 

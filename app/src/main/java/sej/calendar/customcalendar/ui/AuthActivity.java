@@ -160,6 +160,7 @@ public class AuthActivity extends GoogleCalendarActivity implements GoogleCalend
     class SaveRealmToGoogleCal extends Thread {
         @Override
         public void run() {
+            realm = Realm.getDefaultInstance();
             RealmResults<Memo> realMemo = realm.where(Memo.class).findAll();
             ArrayList<Memo> memoList = new ArrayList<>();
             for (Memo m: realMemo) {

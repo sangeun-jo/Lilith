@@ -176,7 +176,12 @@ public class GoogleCalendar {
                     .setSummary(m.getTitle())
                     .setDescription(m.getContent());
 
-            DateTime startDateTime = new DateTime(m.getDate());
+            DateTime startDateTime = null;
+            try {
+                startDateTime = new DateTime(yMd.parse(m.getDate()).toString());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             EventDateTime start = new EventDateTime()
                     .setDate(startDateTime);
             event.setStart(start);

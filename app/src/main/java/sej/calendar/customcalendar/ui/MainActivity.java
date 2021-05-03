@@ -132,8 +132,6 @@ public class MainActivity extends GoogleCalendarActivity {
                 calendarAdapter.setSelectedDate(customDate);
                 calendarAdapter.notifyDataSetChanged();
             }
-
-
         });
         
         observe();
