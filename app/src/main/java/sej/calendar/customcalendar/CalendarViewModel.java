@@ -190,7 +190,6 @@ public class CalendarViewModel extends ViewModel {
                     start.add(Calendar.DATE,1);
                 }
 
-
             } else { //구글 연동을 한 경우
                 while (start.getTimeInMillis() <= end.getTimeInMillis()) {
                     String date = ymd.format(start.getTime());
