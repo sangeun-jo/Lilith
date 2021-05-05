@@ -120,12 +120,14 @@ public class MainActivity extends GoogleCalendarActivity {
                     intent.putExtra("date12", date12);
 
                     HashMap<String, Memo> eventList = binding.getCalendarViewModel().getEventList();
-                    
+
                     if (eventList.get(date12) != null) {
                         title = eventList.get(date12).getTitle();
                         content = eventList.get(date12).getContent();
                     }
 
+                    
+                    System.out.println("date12: " + date12);
                     System.out.println("title " + title);
                     System.out.println("content " + content);
 
