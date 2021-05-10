@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import io.realm.Realm;
 import sej.calendar.customcalendar.model.DayView;
@@ -164,8 +165,9 @@ public class CalendarViewModel extends ViewModel {
             ArrayList<Memo> normalDateList = new ArrayList<>();
             SimpleDateFormat ymd = new SimpleDateFormat("yyyy-M-d", Locale.getDefault());
 
-            if(savedCalendar != null) { //구글 연동을 안한 경우
+            if(savedCalendar != null) { //구글 연동을 한 경우
                 String calendarId = null;
+
                 try {
                     //calendarId = googleTask.getCalendarID(savedCalendar);
                     eventList = googleTask.getEventByDate(savedCalendar, new DateTime(start.getTime()), new DateTime(end.getTime()));
@@ -190,7 +192,7 @@ public class CalendarViewModel extends ViewModel {
                     start.add(Calendar.DATE,1);
                 }
 
-            } else { //구글 연동을 한 경우
+            } else { //구글 연동을 안 한 경우
                 while (start.getTimeInMillis() <= end.getTimeInMillis()) {
                     String date = ymd.format(start.getTime());
                     Memo memo = new Memo();

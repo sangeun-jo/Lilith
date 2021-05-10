@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -119,17 +120,25 @@ public class MainActivity extends GoogleCalendarActivity {
                     intent.putExtra("customDate", customDate);
                     intent.putExtra("date12", date12);
 
-                    HashMap<String, Memo> eventList = binding.getCalendarViewModel().getEventList();
-
+                    ArrayList<DayView> dayViews = binding.getCalendarViewModel().getCalList();
+                    for (DayView d: dayViews) {
+                        if(d.getMemo().getDate().equals(date12)) {
+                            title = d.getMemo().getTitle();
+                            content = d.getMemo().getContent();
+                        }
+                    }
+                    /*
                     if (eventList.get(date12) != null) {
                         title = eventList.get(date12).getTitle();
                         content = eventList.get(date12).getContent();
                     }
 
-                    
-                    System.out.println("date12: " + date12);
-                    System.out.println("title " + title);
-                    System.out.println("content " + content);
+                     */
+
+
+                    System.out.println("date12(m): " + date12);
+                    System.out.println("title(m)" + title);
+                    System.out.println("content(m) " + content);
 
                     intent.putExtra("title", title);
                     intent.putExtra("content", content);
